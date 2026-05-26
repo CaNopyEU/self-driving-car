@@ -1,0 +1,195 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Self-driving car - No libraries</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="carCanvas"></canvas>
+    <div id="verticalButtons">
+        <button onclick="save()" title="Save the best car's brain to memory">💾</button>
+        <button onclick="saveAndRestart()" title="Save brain and restart with next generation">💾🔄</button>
+        <button onclick="discard()" title="Delete saved brain from memory">🗑️</button>
+        <button onclick="restartSimulation()" title="Restart simulation (keeps saved brain)">🔄</button>
+        <button onclick="toggleSettings()" title="Open settings panel">⚙️</button>
+        <button onclick="toggleHelp()" title="How does this work?">❓</button>
+    </div>
+    <canvas id="networkCanvas"></canvas>
+
+    <div id="settingsPanel" class="collapsed">
+        <div id="settingsHeader">
+            <span>Settings</span>
+            <button onclick="toggleSettings()">&times;</button>
+        </div>
+        <div id="settingsBody">
+            <fieldset>
+                <legend>Auto & Physics</legend>
+                <label title="How many AI cars train at once. More = better chance to find a good driver, but slower.">Population (N)
+                    <input type="number" id="cfg-N" min="1" max="500" step="1">
+                </label>
+                <label title="Top speed of AI cars. Higher = faster but harder to control.">Max Speed
+                    <span class="range-row">
+                        <input type="range" id="cfg-maxSpeedAI" min="0.5" max="10" step="0.5">
+                        <span class="range-val"></span>
+                    </span>
+                </label>
+                <label title="How quickly cars speed up. Higher = more responsive, but less stable.">Acceleration
+                    <span class="range-row">
+                        <input type="range" id="cfg-acceleration" min="0.05" max="1" step="0.05">
+                        <span class="range-val"></span>
+                    </span>
+                </label>
+                <label title="How quickly cars slow down naturally. Higher = more drag, cars brake sooner.">Friction
+                    <span class="range-row">
+                        <input type="range" id="cfg-friction" min="0.01" max="0.2" step="0.01">
+                        <span class="range-val"></span>
+                    </span>
+                </label>
+                <label title="How sharply cars can turn. Higher = tighter turns, but easier to lose control.">Steering
+                    <span class="range-row">
+                        <input type="range" id="cfg-steeringSensitivity" min="0.01" max="0.1" step="0.005">
+                        <span class="range-val"></span>
+                    </span>
+                </label>
+            </fieldset>
+
+            <fieldset>
+                <legend>Traffic</legend>
+                <label title="Speed of obstacle cars. Higher = harder to avoid.">Traffic Speed
+                    <span class="range-row">
+                        <input type="range" id="cfg-trafficSpeed" min="0.5" max="5" step="0.5">
+                        <span class="range-val"></span>
+                    </span>
+                </label>
+                <label title="Number of lanes on the road. More lanes = more room but also more traffic.">Lane Count
+                    <input type="number" id="cfg-laneCount" min="2" max="6" step="1">
+                </label>
+            </fieldset>
+
+            <fieldset>
+                <legend>Neural Network</legend>
+                <label title="How much the brain changes between generations. Low = small tweaks, high = wild changes.">Mutation Rate
+                    <span class="range-row">
+                        <input type="range" id="cfg-mutationRate" min="0" max="1" step="0.05">
+                        <span class="range-val"></span>
+                    </span>
+                </label>
+                <label title="Neurons in the hidden layer — the brain's thinking capacity. More = smarter but slower to train.">Hidden Neurons
+                    <input type="number" id="cfg-hiddenNeurons" min="2" max="20" step="1">
+                </label>
+                <label title="Number of sensor rays the car uses to 'see' obstacles ahead.">Ray Count
+                    <input type="number" id="cfg-rayCount" min="1" max="15" step="1">
+                </label>
+                <label title="How far each sensor ray can detect obstacles. Longer = sees further ahead.">Ray Length
+                    <span class="range-row">
+                        <input type="range" id="cfg-rayLength" min="50" max="400" step="10">
+                        <span class="range-val"></span>
+                    </span>
+                </label>
+                <label title="Bonus fitness points per overtaken car. 0 = only distance matters. Higher = reward traffic weaving.">Overtake Weight
+                    <span class="range-row">
+                        <input type="range" id="cfg-overtakeWeight" min="0" max="200" step="10">
+                        <span class="range-val"></span>
+                    </span>
+                </label>
+                <label title="Angle of the sensor cone. Wider = sees more to the sides, narrower = focused ahead.">Ray Spread (°)
+                    <span class="range-row">
+                        <input type="range" id="cfg-raySpread" min="30" max="360" step="10">
+                        <span class="range-val"></span>
+                    </span>
+                </label>
+            </fieldset>
+
+            <fieldset>
+                <legend>Visual & Simulation</legend>
+                <label title="Transparency of non-best cars. 0 = invisible, 1 = fully visible.">Ghost Opacity
+                    <span class="range-row">
+                        <input type="range" id="cfg-nonBestOpacity" min="0" max="1" step="0.05">
+                        <span class="range-val"></span>
+                    </span>
+                </label>
+                <label title="Run multiple simulation steps per frame. Higher = faster training but choppier visuals.">Sim Speed
+                    <span class="range-row">
+                        <input type="range" id="cfg-simSpeed" min="1" max="5" step="1">
+                        <span class="range-val"></span>
+                    </span>
+                </label>
+                <label class="checkbox-row" title="Show the yellow sensor rays on the best car.">
+                    <input type="checkbox" id="cfg-showSensors">
+                    Show Sensors
+                </label>
+                <label class="checkbox-row" title="Pause the simulation. Cars stop moving but you can still change settings.">
+                    <input type="checkbox" id="cfg-paused">
+                    Paused
+                </label>
+            </fieldset>
+
+            <div id="presets">
+                <span>Presets:</span>
+                <button class="preset-btn" onclick="loadPreset('fast')">Fast Learn</button>
+                <button class="preset-btn" onclick="loadPreset('finetune')">Fine-tune</button>
+                <button class="preset-btn" onclick="loadPreset('wide')">Wide Road</button>
+                <button class="preset-btn" onclick="loadPreset('default')">Default</button>
+            </div>
+            <button id="applyBtn" onclick="applySettings()">Apply & Restart</button>
+        </div>
+    </div>
+
+    <div id="helpOverlay" class="hidden" onclick="if(event.target===this)toggleHelp()">
+        <div id="helpContent">
+            <button id="helpClose" onclick="toggleHelp()">&times;</button>
+            <h2>Self-Driving Car Simulator</h2>
+            <p>Cars learn to drive by themselves using a <strong>neural network</strong> — a simple artificial brain inspired by how real neurons work.</p>
+
+            <h3>How it works</h3>
+            <ol>
+                <li><strong>Sensors</strong> — Each car has yellow rays that detect obstacles and road edges. These are the brain's "eyes".</li>
+                <li><strong>Brain</strong> — The neural network (shown on the right) takes sensor data and decides: go forward, turn left, turn right, or reverse.</li>
+                <li><strong>Selection</strong> — The car that gets the furthest without crashing is the "best" (shown in full color). All others are transparent ghosts.</li>
+                <li><strong>Evolution</strong> — Save the best brain, restart, and all new cars get slightly mutated copies. Over generations, they learn to drive!</li>
+            </ol>
+
+            <h3>Training workflow</h3>
+            <ol>
+                <li>Watch cars drive. The best one is highlighted automatically.</li>
+                <li>When you're happy with one, click <strong>💾 Save</strong> to remember its brain.</li>
+                <li>Click <strong>🔄 Restart</strong> — new cars spawn with mutations of the saved brain.</li>
+                <li>Repeat! Each generation should get better.</li>
+                <li>Click <strong>🗑️ Discard</strong> to start completely fresh.</li>
+            </ol>
+
+            <h3>Neural network display</h3>
+            <p>The black panel on the right shows the best car's brain in real-time:</p>
+            <ul>
+                <li><strong>Bottom nodes</strong> — sensor inputs (how close obstacles are)</li>
+                <li><strong>Middle nodes</strong> — hidden layer (the "thinking" part)</li>
+                <li><strong>Top nodes</strong> — outputs: ↑ forward, ← left, → right, ↓ reverse</li>
+                <li><strong>Yellow lines</strong> — positive connections (encouraging)</li>
+                <li><strong>Blue lines</strong> — negative connections (inhibiting)</li>
+                <li><strong>Dashed circles</strong> — neuron bias (activation threshold)</li>
+            </ul>
+
+            <h3>Buttons</h3>
+            <table>
+                <tr><td>💾</td><td>Save the best car's brain</td></tr>
+                <tr><td>🗑️</td><td>Delete saved brain, start fresh</td></tr>
+                <tr><td>🔄</td><td>Restart simulation (keeps saved brain)</td></tr>
+                <tr><td>⚙️</td><td>Open settings panel</td></tr>
+                <tr><td>❓</td><td>This help screen</td></tr>
+            </table>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="visualizer.js"></script>
+    <script src="network.js"></script>
+    <script src="sensor.js"></script>
+    <script src="utils.js"></script>
+    <script src="road.js"></script>
+    <script src="controls.js"></script>
+    <script src="car.js"></script>
+    <script src="settings.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
