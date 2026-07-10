@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Neon Overdrive 3D</title>
+    <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%23050817'/%3E%3Cpath d='M10 42h44l-6-18H16z' fill='%23ff2c81'/%3E%3Cpath d='M18 24h28l-6-8H24z' fill='%2300e5ff'/%3E%3Ccircle cx='20' cy='44' r='5' fill='%23111'/%3E%3Ccircle cx='44' cy='44' r='5' fill='%23111'/%3E%3C/svg%3E">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="game"></div>
+
+    <section id="hud" class="hidden" aria-live="polite">
+        <div class="hud-card score-card">
+            <span>Score</span>
+            <strong id="scoreValue">0</strong>
+        </div>
+        <div class="hud-card">
+            <span>Level</span>
+            <strong id="levelValue">1</strong>
+        </div>
+        <div class="hud-card">
+            <span>Speed</span>
+            <strong id="speedValue">0</strong>
+        </div>
+        <div class="hud-card">
+            <span>Combo</span>
+            <strong id="comboValue">x1</strong>
+        </div>
+        <div class="hud-card danger-card">
+            <span>Integrity</span>
+            <strong id="healthValue">100%</strong>
+        </div>
+    </section>
+
+    <section id="centerPanel" class="panel">
+        <p class="eyebrow">Perspective arcade racer</p>
+        <h1>Neon Overdrive 3D</h1>
+        <p id="panelText">Thread through adaptive traffic, chase score gates, and survive the city sprint.</p>
+        <div id="panelStats" class="stats"></div>
+        <button id="startButton" type="button">Start Run</button>
+        <p class="controls">W/Up accelerate · S/Down brake · A/D steer · Space handbrake · C camera · M mute · Enter restart</p>
+    </section>
+
+    <div id="toast" class="toast hidden"></div>
+
+    <script type="importmap">
+        {
+            "imports": {
+                "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js"
+            }
+        }
+    </script>
+    <script type="module" src="main.js"></script>
+</body>
+</html>

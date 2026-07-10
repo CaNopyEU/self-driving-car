@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, user-scalable=no">
+<title>NEON RUSH — 3D</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="game">
+  <div id="hud" class="hidden">
+    <div class="hud-row hud-top">
+      <div class="hud-block">
+        <div class="hud-label">SCORE</div>
+        <div id="score" class="hud-big">0</div>
+      </div>
+      <div class="hud-block hud-center">
+        <div class="hud-label">WAVE</div>
+        <div id="wave" class="hud-big">1</div>
+      </div>
+      <div class="hud-block hud-right">
+        <div class="hud-label">SPEED</div>
+        <div id="speed" class="hud-big">0<span class="unit">km/h</span></div>
+      </div>
+    </div>
+    <div class="hud-row hud-second">
+      <div class="hud-block">
+        <div class="hud-label">BEST</div>
+        <div id="best" class="hud-small">0</div>
+      </div>
+      <div id="multiPill" class="multi-pill">x1</div>
+      <div class="hud-block hud-right">
+        <div class="hud-label">SHIELD</div>
+        <div class="shield-bar"><div id="shieldFill"></div></div>
+      </div>
+    </div>
+    <div id="boostBarWrap"><div id="boostBar"></div></div>
+    <div id="toast"></div>
+  </div>
+
+  <div id="overlay">
+    <div id="startScreen" class="panel">
+      <h1 class="logo">NEON<span>RUSH</span></h1>
+      <p class="tag">Outrun the swarm. It learns.</p>
+      <button id="startBtn" class="btn">▶ START</button>
+      <div class="controls-help">
+        <div><kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd> steer</div>
+        <div><kbd>↑</kbd><kbd>W</kbd> accelerate &nbsp; <kbd>↓</kbd><kbd>S</kbd> brake</div>
+        <div><kbd>Space</kbd> boost &nbsp; <kbd>P</kbd> pause &nbsp; <kbd>M</kbd> mute</div>
+      </div>
+      <p class="hint">Dodge traffic, grab <span class="c-coin">coins</span> &amp; <span class="c-shield">shields</span>, chain overtakes for combo.</p>
+    </div>
+
+    <div id="pauseScreen" class="panel hidden">
+      <h2>PAUSED</h2>
+      <button id="resumeBtn" class="btn">RESUME</button>
+      <button id="quitBtn" class="btn btn-ghost">QUIT</button>
+    </div>
+
+    <div id="gameOverScreen" class="panel hidden">
+      <h2 class="go-title">WRECKED</h2>
+      <div class="go-stats">
+        <div><span>Score</span><b id="finalScore">0</b></div>
+        <div><span>Best</span><b id="finalBest">0</b></div>
+        <div><span>Wave</span><b id="finalWave">1</b></div>
+        <div><span>Overtakes</span><b id="finalOvertakes">0</b></div>
+      </div>
+      <div id="newBest" class="new-best hidden">★ NEW BEST ★</div>
+      <button id="restartBtn" class="btn">↻ RETRY</button>
+    </div>
+  </div>
+</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.160.0/build/three.module.js" } }
+</script>
+<script type="module" src="nn.js"></script>
+<script type="module" src="game.js"></script>
+</body>
+</html>

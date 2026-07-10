@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>Neural Racer</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <canvas id="gameCanvas"></canvas>
+    <div id="startScreen">
+        <h1>NEURAL RACER</h1>
+        <p class="subtitle">Outrun the AI. Dodge traffic. Survive.</p>
+        <div class="controls-info">
+            <div><kbd>&uarr;</kbd> Accelerate</div>
+            <div><kbd>&darr;</kbd> Brake</div>
+            <div><kbd>&larr;</kbd> <kbd>&rarr;</kbd> Steer</div>
+        </div>
+        <button id="startBtn" onclick="startGame()">START</button>
+        <p class="highscore" id="startHighScore"></p>
+    </div>
+    <div id="gameOverScreen" class="hidden">
+        <h1>GAME OVER</h1>
+        <p id="finalScore"></p>
+        <p id="finalLevel"></p>
+        <p id="gameOverHighScore"></p>
+        <button onclick="startGame()">PLAY AGAIN</button>
+    </div>
+    <div id="hud" class="hidden">
+        <div id="hudScore">SCORE: 0</div>
+        <div id="hudLevel">LEVEL 1</div>
+        <div id="hudSpeed"></div>
+        <div id="hudLives"></div>
+    </div>
+    <div id="levelUp" class="hidden">LEVEL <span id="levelUpNum">2</span></div>
+
+    <script src="utils.js"></script>
+    <script src="network.js"></script>
+    <script src="road.js"></script>
+    <script src="controls.js"></script>
+    <script src="sensor.js"></script>
+    <script src="car.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>

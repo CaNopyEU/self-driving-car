@@ -1,0 +1,162 @@
+*{box-sizing:border-box;}
+html,body{
+    margin:0; padding:0; height:100%;
+    background:#050510;
+    color:#eee;
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;
+    overflow:hidden;
+    user-select:none;
+}
+
+#gameWrap{position:relative;width:100vw;height:100vh;}
+
+#carCanvas{
+    display:block;
+    background:#0b0b18;
+    width:100vw;
+    height:100vh;
+}
+
+/* ---- HUD ---- */
+#hud{
+    position:absolute;
+    top:14px; left:14px;
+    display:flex;
+    gap:10px;
+    z-index:5;
+    pointer-events:none;
+}
+.hud-block{
+    background:rgba(10,12,25,0.72);
+    border:1px solid rgba(120,150,255,0.25);
+    padding:6px 12px;
+    border-radius:6px;
+    min-width:70px;
+    text-align:center;
+    backdrop-filter:blur(4px);
+}
+.hud-label{
+    font-size:10px;
+    letter-spacing:2px;
+    color:#8aa;
+    font-weight:600;
+}
+.hud-val{
+    font-size:20px;
+    font-weight:bold;
+    color:#fff;
+    font-variant-numeric:tabular-nums;
+    line-height:1.1;
+}
+.hud-combo .hud-val{color:#ffcf3a;}
+
+/* ---- Level banner (drawn on canvas, but shell for future) ---- */
+#levelBanner{display:none;}
+
+/* ---- Overlay ---- */
+#overlay{
+    position:absolute; inset:0;
+    background:radial-gradient(ellipse at center, rgba(30,20,80,0.7), rgba(0,0,10,0.95));
+    display:flex; justify-content:center; align-items:center;
+    z-index:20;
+    opacity:0;
+    pointer-events:none;
+    transition:opacity 0.3s;
+}
+#overlay.show{opacity:1; pointer-events:auto;}
+
+#overlayCard{
+    background:rgba(15,15,35,0.9);
+    border:2px solid rgba(120,150,255,0.4);
+    border-radius:14px;
+    padding:36px 44px;
+    text-align:center;
+    max-width:520px;
+    box-shadow:0 20px 60px rgba(0,0,0,0.7), 0 0 40px rgba(80,120,255,0.2);
+}
+
+#overlayCard h1{
+    margin:0 0 8px;
+    font-size:48px;
+    letter-spacing:6px;
+    background:linear-gradient(90deg,#5ec8ff,#ffcf3a,#e63a3a);
+    -webkit-background-clip:text;
+    background-clip:text;
+    color:transparent;
+    text-shadow:0 0 30px rgba(94,200,255,0.4);
+}
+
+#overlayCard .tag{
+    color:#aac;
+    margin:0 0 20px;
+    font-size:14px;
+}
+
+#overlayCard .finalScore{
+    font-size:36px;
+    font-weight:bold;
+    color:#ffcf3a;
+    margin:12px 0 4px;
+}
+#overlayCard .finalBest{
+    color:#8aa;
+    margin-bottom:4px;
+    font-size:15px;
+}
+#overlayCard .finalLevel{
+    color:#8aa;
+    margin-bottom:16px;
+    font-size:13px;
+}
+
+.controls{
+    display:grid;
+    grid-template-columns:1fr 1fr;
+    gap:8px 20px;
+    text-align:left;
+    margin:14px auto 22px;
+    max-width:400px;
+    font-size:13px;
+    color:#ccd;
+}
+.controls > div{padding:4px 0;}
+
+kbd{
+    display:inline-block;
+    background:#2a2a48;
+    border:1px solid #556;
+    border-bottom-width:2px;
+    color:#fff;
+    padding:1px 8px;
+    border-radius:4px;
+    font-family:monospace;
+    font-size:12px;
+    margin-right:2px;
+}
+
+#overlayCard button{
+    background:linear-gradient(180deg,#4a9eff,#2a5edd);
+    border:none;
+    color:#fff;
+    font-size:20px;
+    font-weight:bold;
+    letter-spacing:3px;
+    padding:14px 40px;
+    border-radius:8px;
+    cursor:pointer;
+    box-shadow:0 6px 20px rgba(50,120,255,0.4);
+    transition:transform 0.1s, box-shadow 0.2s;
+}
+#overlayCard button:hover{
+    transform:translateY(-2px);
+    box-shadow:0 10px 24px rgba(50,120,255,0.55);
+}
+#overlayCard button:active{transform:translateY(0);}
+
+#overlayCard .hint{
+    margin-top:18px;
+    font-size:12px;
+    color:#889;
+    line-height:1.5;
+}
+.coin{color:#ffcf3a; font-weight:bold;}

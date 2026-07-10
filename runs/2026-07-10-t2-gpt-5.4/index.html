@@ -1,0 +1,94 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Neon Runaway</title>
+    <link rel="icon" href="data:,">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="app">
+        <div id="hud" class="hidden">
+            <div class="hud-card">
+                <span class="hud-label">Score</span>
+                <span id="scoreValue" class="hud-value">0</span>
+            </div>
+            <div class="hud-card">
+                <span class="hud-label">Speed</span>
+                <span id="speedValue" class="hud-value">0</span>
+            </div>
+            <div class="hud-card">
+                <span class="hud-label">Stage</span>
+                <span id="stageValue" class="hud-value">1</span>
+            </div>
+            <div class="hud-card">
+                <span class="hud-label">Close Calls</span>
+                <span id="closeCallValue" class="hud-value">0</span>
+            </div>
+        </div>
+
+        <div id="banner" class="hidden"></div>
+
+        <div id="menuOverlay" class="overlay visible">
+            <div class="panel hero-panel">
+                <p class="eyebrow">Arcade Highway Survival</p>
+                <h1>Neon Runaway</h1>
+                <p class="pitch">Thread the midnight expressway, skim traffic for bonus points, and survive long enough to push the city into full chaos.</p>
+                <div class="button-row">
+                    <button id="startButton" class="primary">Start Run</button>
+                </div>
+                <div class="info-grid">
+                    <div>
+                        <span class="info-label">Controls</span>
+                        <span>WASD or Arrows, Space boost</span>
+                    </div>
+                    <div>
+                        <span class="info-label">Goal</span>
+                        <span>Drive fast, dodge traffic, chain close calls</span>
+                    </div>
+                    <div>
+                        <span class="info-label">High Score</span>
+                        <span id="menuHighScore">0</span>
+                    </div>
+                    <div>
+                        <span class="info-label">Tip</span>
+                        <span>Speed feeds score, but boost drains fast</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="gameOverOverlay" class="overlay hidden">
+            <div class="panel">
+                <p class="eyebrow">Run Over</p>
+                <h2 id="gameOverTitle">Traffic Won</h2>
+                <p id="gameOverSummary" class="pitch"></p>
+                <div class="results-grid">
+                    <div>
+                        <span class="info-label">Final Score</span>
+                        <span id="finalScore">0</span>
+                    </div>
+                    <div>
+                        <span class="info-label">Best Score</span>
+                        <span id="bestScore">0</span>
+                    </div>
+                    <div>
+                        <span class="info-label">Distance</span>
+                        <span id="finalDistance">0 m</span>
+                    </div>
+                    <div>
+                        <span class="info-label">Stage Reached</span>
+                        <span id="finalStage">1</span>
+                    </div>
+                </div>
+                <div class="button-row">
+                    <button id="restartButton" class="primary">Run It Back</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script type="module" src="main.js"></script>
+</body>
+</html>

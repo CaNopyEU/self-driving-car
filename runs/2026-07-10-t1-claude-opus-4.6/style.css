@@ -1,0 +1,75 @@
+*{margin:0;padding:0;box-sizing:border-box}
+body{
+    background:#111;
+    overflow:hidden;
+    font-family:'Courier New',monospace;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    height:100vh;
+    color:#fff;
+}
+#gameCanvas{
+    position:absolute;
+    top:0;left:0;
+    width:100%;height:100%;
+}
+#startScreen,#gameOverScreen{
+    position:fixed;
+    inset:0;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    background:rgba(0,0,0,0.85);
+    z-index:100;
+    gap:12px;
+}
+#startScreen h1,#gameOverScreen h1{
+    font-size:48px;
+    color:#0ff;
+    text-shadow:0 0 20px #0ff,0 0 40px #08f;
+    letter-spacing:6px;
+}
+.subtitle{color:#888;font-size:14px}
+.controls-info{
+    display:flex;gap:20px;margin:10px 0;color:#aaa;font-size:13px;
+}
+kbd{
+    background:#333;padding:2px 8px;border-radius:3px;
+    border:1px solid #555;color:#fff;
+}
+button{
+    background:#0ff;color:#000;border:none;
+    padding:12px 40px;font-size:18px;font-weight:bold;
+    border-radius:4px;cursor:pointer;font-family:inherit;
+    margin-top:10px;
+}
+button:hover{background:#fff;transform:scale(1.05)}
+.hidden{display:none!important}
+#hud{
+    position:fixed;top:10px;left:10px;right:10px;
+    display:flex;justify-content:space-between;
+    z-index:50;font-size:14px;pointer-events:none;
+}
+#hudScore{color:#0f0;font-weight:bold;font-size:18px}
+#hudLevel{color:#ff0}
+#hudSpeed{color:#aaa}
+#hudLives{color:#f44;font-size:18px}
+#levelUp{
+    position:fixed;top:50%;left:50%;
+    transform:translate(-50%,-50%);
+    font-size:48px;color:#ff0;font-weight:bold;
+    text-shadow:0 0 20px #ff0;
+    z-index:60;
+    animation:levelPulse 1.5s ease-out forwards;
+}
+@keyframes levelPulse{
+    0%{opacity:0;transform:translate(-50%,-50%) scale(0.5)}
+    20%{opacity:1;transform:translate(-50%,-50%) scale(1.2)}
+    100%{opacity:0;transform:translate(-50%,-50%) scale(1)}
+}
+.highscore{color:#ff0;font-size:13px;margin-top:5px}
+#finalScore{font-size:24px;color:#0f0}
+#finalLevel{color:#aaa;font-size:14px}
+#gameOverHighScore{color:#ff0;font-size:14px}

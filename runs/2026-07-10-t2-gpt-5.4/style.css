@@ -1,0 +1,231 @@
+html,
+body{
+    margin:0;
+    width:100%;
+    height:100%;
+    overflow:hidden;
+    background:radial-gradient(circle at top,#27124d 0%,#090812 50%,#020204 100%);
+    color:#f5efff;
+    font-family:Inter,Segoe UI,Roboto,Helvetica,Arial,sans-serif;
+}
+
+body{
+    position:relative;
+}
+
+canvas{
+    display:block;
+}
+
+#app{
+    position:fixed;
+    inset:0;
+}
+
+#hud{
+    position:fixed;
+    top:18px;
+    left:18px;
+    display:grid;
+    grid-template-columns:repeat(2,minmax(110px,1fr));
+    gap:10px;
+    width:min(340px,calc(100vw - 36px));
+    z-index:20;
+}
+
+#hud.hidden,
+.hidden{
+    display:none;
+}
+
+.hud-card,
+.panel{
+    background:rgba(10,10,20,0.6);
+    border:1px solid rgba(182,120,255,0.35);
+    box-shadow:0 18px 60px rgba(0,0,0,0.35),inset 0 1px 0 rgba(255,255,255,0.05);
+    backdrop-filter:blur(18px);
+}
+
+.hud-card{
+    border-radius:16px;
+    padding:12px 14px;
+    display:flex;
+    flex-direction:column;
+    gap:3px;
+}
+
+.hud-label,
+.info-label,
+.eyebrow{
+    text-transform:uppercase;
+    letter-spacing:0.14em;
+    font-size:11px;
+    color:#b8a8da;
+}
+
+.hud-value{
+    font-size:28px;
+    font-weight:800;
+    line-height:1;
+    color:#fff7ff;
+}
+
+#banner{
+    position:fixed;
+    top:20px;
+    left:50%;
+    transform:translateX(-50%);
+    padding:10px 18px;
+    border-radius:999px;
+    background:rgba(255,95,31,0.18);
+    border:1px solid rgba(255,154,92,0.45);
+    box-shadow:0 12px 30px rgba(255,102,41,0.22);
+    font-weight:700;
+    letter-spacing:0.08em;
+    text-transform:uppercase;
+    z-index:25;
+}
+
+.overlay{
+    position:fixed;
+    inset:0;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    padding:24px;
+    background:linear-gradient(180deg,rgba(5,5,10,0.5),rgba(5,5,10,0.82));
+    z-index:30;
+}
+
+.overlay.visible{
+    display:flex;
+}
+
+.overlay.hidden{
+    display:none !important;
+}
+
+.panel{
+    width:min(680px,100%);
+    padding:28px;
+    border-radius:28px;
+}
+
+.hero-panel{
+    background:
+        radial-gradient(circle at top right,rgba(36,188,255,0.18),transparent 35%),
+        radial-gradient(circle at bottom left,rgba(255,48,145,0.18),transparent 30%),
+        rgba(10,10,20,0.72);
+}
+
+h1,
+h2,
+p{
+    margin:0;
+}
+
+h1{
+    margin-top:8px;
+    font-size:clamp(42px,8vw,76px);
+    line-height:0.95;
+}
+
+h2{
+    margin-top:8px;
+    font-size:clamp(32px,6vw,52px);
+}
+
+.pitch{
+    margin-top:16px;
+    max-width:56ch;
+    line-height:1.6;
+    color:#ddd4ef;
+}
+
+.button-row{
+    display:flex;
+    gap:12px;
+    margin-top:22px;
+}
+
+button{
+    appearance:none;
+    border:none;
+    border-radius:999px;
+    padding:14px 22px;
+    font:inherit;
+    font-weight:800;
+    letter-spacing:0.04em;
+    cursor:pointer;
+    transition:transform 0.15s ease,box-shadow 0.15s ease,filter 0.15s ease;
+}
+
+button:hover{
+    transform:translateY(-1px);
+    filter:brightness(1.08);
+}
+
+button:active{
+    transform:translateY(1px) scale(0.99);
+}
+
+.primary{
+    color:#130616;
+    background:linear-gradient(135deg,#ffd06e,#ff8f4e 45%,#ff4fb3);
+    box-shadow:0 18px 32px rgba(255,79,179,0.28);
+}
+
+.info-grid,
+.results-grid{
+    display:grid;
+    grid-template-columns:repeat(2,minmax(0,1fr));
+    gap:16px;
+    margin-top:26px;
+}
+
+.info-grid div,
+.results-grid div{
+    padding:16px;
+    border-radius:18px;
+    background:rgba(255,255,255,0.04);
+    display:flex;
+    flex-direction:column;
+    gap:6px;
+}
+
+.results-grid span:last-child,
+.info-grid span:last-child{
+    font-size:18px;
+    font-weight:700;
+}
+
+@media (max-width:720px){
+    #hud{
+        grid-template-columns:repeat(2,minmax(0,1fr));
+        top:12px;
+        left:12px;
+        width:calc(100vw - 24px);
+    }
+
+    .hud-value{
+        font-size:24px;
+    }
+
+    .panel{
+        padding:22px;
+        border-radius:24px;
+    }
+
+    .info-grid,
+    .results-grid{
+        grid-template-columns:1fr;
+    }
+
+    .button-row{
+        flex-direction:column;
+    }
+
+    button{
+        width:100%;
+    }
+}

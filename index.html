@@ -1,195 +1,724 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <meta charset="utf-8">
-    <title>Self-driving car - No libraries</title>
-    <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Self-Driving Car Bench</title>
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='6' fill='%232a78d6'/%3E%3Ctext x='16' y='22' font-size='18' text-anchor='middle' fill='white' font-family='sans-serif'%3E%F0%9F%9A%97%3C/text%3E%3C/svg%3E">
+<style>
+  :root{
+    --bg:#f9f9f7;
+    --surface:#fcfcfb;
+    --ink:#0b0b0b;
+    --ink2:#52514e;
+    --ink-muted:#898781;
+    --border:rgba(11,11,11,0.10);
+    --grid:#e1e0d9;
+    --accent:#2a78d6;
+    --accent-ink:#fff;
+    --t1:#2a78d6; --t1-bg:rgba(42,120,214,0.12);
+    --t2:#1baf7a; --t2-bg:rgba(27,175,122,0.12);
+    --t3:#4a3aa7; --t3-bg:rgba(74,58,167,0.12);
+    --good:#0ca30c; --good-bg:rgba(12,163,12,0.12);
+    --serious:#ec835a; --serious-bg:rgba(236,131,90,0.14);
+    --critical:#d03b3b; --critical-bg:rgba(208,59,59,0.12);
+    --shadow: 0 1px 2px rgba(11,11,11,0.04), 0 4px 12px rgba(11,11,11,0.05);
+  }
+  @media (prefers-color-scheme: dark){
+    :root{
+      --bg:#0d0d0d;
+      --surface:#1a1a19;
+      --ink:#ffffff;
+      --ink2:#c3c2b7;
+      --ink-muted:#898781;
+      --border:rgba(255,255,255,0.10);
+      --grid:#2c2c2a;
+      --accent:#3987e5;
+      --accent-ink:#fff;
+      --t1:#3987e5; --t1-bg:rgba(57,135,229,0.12);
+      --t2:#199e70; --t2-bg:rgba(25,158,112,0.14);
+      --t3:#9085e9; --t3-bg:rgba(144,133,233,0.14);
+      --shadow: 0 1px 2px rgba(0,0,0,0.3), 0 4px 16px rgba(0,0,0,0.35);
+    }
+  }
+
+  *{ box-sizing:border-box; }
+  html,body{ margin:0; padding:0; }
+  body{
+    background:var(--bg);
+    color:var(--ink);
+    font-family:system-ui,-apple-system,"Segoe UI",sans-serif;
+    line-height:1.4;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{ color:var(--accent); text-decoration:none; }
+  a:hover{ text-decoration:underline; }
+
+  .wrap{ max-width:1280px; margin:0 auto; padding:32px 24px 64px; }
+
+  header.top{ margin-bottom:28px; }
+  header.top h1{ font-size:28px; font-weight:700; margin:0 0 6px; letter-spacing:-0.01em; }
+  header.top p.subtitle{ margin:0 0 14px; color:var(--ink2); font-size:15px; }
+  nav.links{ display:flex; flex-wrap:wrap; gap:6px 18px; font-size:14px; }
+  nav.links a{ color:var(--ink2); }
+  nav.links a:hover{ color:var(--accent); }
+  nav.links .sep{ color:var(--border); }
+
+  .toolbar{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:16px; flex-wrap:wrap;
+    margin:22px 0 22px;
+    padding-bottom:16px;
+    border-bottom:1px solid var(--border);
+  }
+  .filter-groups{ display:flex; gap:20px; flex-wrap:wrap; align-items:center; }
+  .filter-group{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .filter-group .fg-label{ font-size:12px; color:var(--ink-muted); text-transform:uppercase; letter-spacing:0.04em; margin-right:2px; }
+
+  .chip{
+    display:inline-flex; align-items:center; gap:5px;
+    padding:5px 12px; border-radius:999px;
+    border:1px solid var(--border);
+    background:transparent;
+    color:var(--ink2);
+    font-size:13px; font-family:inherit;
+    cursor:pointer;
+    transition:border-color .12s ease, color .12s ease, background .12s ease;
+  }
+  .chip:hover{ border-color:var(--accent); color:var(--accent); }
+  .chip.active{ border-color:var(--accent); color:var(--accent); background:var(--t1-bg); }
+
+  .view-toggle{ display:flex; gap:2px; border:1px solid var(--border); border-radius:8px; padding:2px; }
+  .view-toggle button{
+    border:none; background:transparent; color:var(--ink-muted);
+    font-size:13px; font-family:inherit; padding:6px 14px; border-radius:6px; cursor:pointer;
+  }
+  .view-toggle button.active{ background:var(--t1-bg); color:var(--accent); }
+
+  .grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));
+    gap:20px;
+  }
+
+  .card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:12px;
+    box-shadow:var(--shadow);
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+  }
+  .card-preview{
+    position:relative;
+    aspect-ratio:16/9;
+    width:100%;
+    background:linear-gradient(135deg, var(--grid), var(--bg));
+    cursor:pointer;
+    overflow:hidden;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-bottom:1px solid var(--border);
+  }
+  .card-preview img{ width:100%; height:100%; object-fit:cover; display:block; }
+  .card-preview .placeholder{
+    display:flex; flex-direction:column; align-items:center; gap:8px;
+    color:var(--ink-muted); font-size:13px; padding:12px; text-align:center;
+  }
+  .card-preview .placeholder .model-name{ color:var(--ink2); font-size:14px; font-weight:600; word-break:break-word; }
+  .card-preview .play-hint{
+    position:absolute; inset:0; display:flex; align-items:center; justify-content:center;
+    background:rgba(11,11,11,0); opacity:0; transition:opacity .15s ease, background .15s ease;
+  }
+  .card-preview:hover .play-hint{ opacity:1; background:rgba(11,11,11,0.25); }
+  .card-preview .play-hint svg{ width:44px; height:44px; filter:drop-shadow(0 1px 3px rgba(0,0,0,0.4)); }
+
+  .card-body{ padding:16px; display:flex; flex-direction:column; gap:12px; flex:1; }
+
+  .card-title-row{ display:flex; align-items:flex-start; justify-content:space-between; gap:8px; }
+  .card-title{ font-size:16px; font-weight:700; color:var(--ink); word-break:break-word; }
+  .badge{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:11px; font-weight:700; letter-spacing:0.02em;
+    padding:3px 9px; border-radius:999px; white-space:nowrap;
+  }
+  .badge-t1{ background:var(--t1-bg); color:var(--t1); }
+  .badge-t2{ background:var(--t2-bg); color:var(--t2); }
+  .badge-t3{ background:var(--t3-bg); color:var(--t3); }
+
+  .card-meta{ font-size:12px; color:var(--ink-muted); display:flex; gap:8px; flex-wrap:wrap; }
+
+  .stat-tiles{
+    display:grid;
+    grid-template-columns:repeat(auto-fit, minmax(72px, 1fr));
+    gap:10px;
+    padding:12px 0;
+    border-top:1px solid var(--border);
+    border-bottom:1px solid var(--border);
+  }
+  .stat-tile{ display:flex; flex-direction:column; gap:2px; }
+  .stat-tile .stat-label{ font-size:11px; color:var(--ink-muted); }
+  .stat-tile .stat-value{ font-size:14px; font-weight:600; color:var(--ink); font-variant-numeric:normal; }
+
+  .review-row{ display:flex; flex-wrap:wrap; gap:10px 14px; font-size:12.5px; align-items:center; }
+  .review-row .score{ color:var(--ink2); }
+  .review-row .score .score-label{ color:var(--ink-muted); cursor:help; border-bottom:1px dotted var(--ink-muted); }
+  .review-row .score .score-val{ color:var(--ink); font-weight:600; }
+  .review-row .awaiting{ color:var(--ink-muted); font-style:italic; }
+
+  .status-row{ display:flex; flex-wrap:wrap; gap:8px; }
+  .status-chip{
+    display:inline-flex; align-items:center; gap:5px;
+    font-size:11.5px; font-weight:600;
+    padding:3px 9px; border-radius:999px;
+  }
+  .status-chip.good{ background:var(--good-bg); color:var(--good); }
+  .status-chip.serious{ background:var(--serious-bg); color:var(--serious); }
+  .status-chip.critical{ background:var(--critical-bg); color:var(--critical); }
+  .status-chip.muted{ background:transparent; color:var(--ink-muted); border:1px solid var(--border); }
+
+  .actions-row{ display:flex; align-items:center; justify-content:space-between; gap:10px; margin-top:auto; padding-top:2px; flex-wrap:wrap; }
+  .actions-left{ display:flex; align-items:center; gap:10px; flex-wrap:wrap; }
+  .btn-play{
+    display:inline-flex; align-items:center; gap:6px;
+    border:1px solid var(--accent); color:var(--accent); background:transparent;
+    font-family:inherit; font-size:13px; font-weight:600;
+    padding:6px 14px; border-radius:8px; cursor:pointer;
+    transition:background .12s ease, color .12s ease;
+  }
+  .btn-play:hover{ background:var(--accent); color:var(--accent-ink); }
+  .result-link{ font-size:13px; }
+  .diff-text{ font-size:12px; color:var(--ink-muted); }
+
+  /* table view */
+  .table-wrap{ overflow-x:auto; border:1px solid var(--border); border-radius:12px; }
+  table.runs-table{ width:100%; border-collapse:collapse; font-size:13px; background:var(--surface); }
+  table.runs-table caption{ text-align:left; padding:10px 14px; color:var(--ink-muted); font-size:12px; }
+  table.runs-table th, table.runs-table td{ padding:10px 12px; text-align:left; border-bottom:1px solid var(--grid); white-space:nowrap; }
+  table.runs-table thead th{ color:var(--ink-muted); font-weight:600; font-size:12px; text-transform:uppercase; letter-spacing:0.03em; border-bottom:1px solid var(--border); }
+  table.runs-table tbody tr:last-child td{ border-bottom:none; }
+  table.runs-table td.num{ font-variant-numeric:tabular-nums; }
+  table.runs-table tbody tr:hover{ background:var(--t1-bg); }
+
+  .hidden{ display:none !important; }
+
+  .empty-state{
+    text-align:center; padding:64px 24px; color:var(--ink2);
+    border:1px dashed var(--border); border-radius:12px; background:var(--surface);
+  }
+  .empty-state h2{ margin:0 0 8px; font-size:18px; color:var(--ink); }
+  .empty-state p{ margin:4px 0; font-size:14px; }
+  .empty-state code{ background:var(--t1-bg); padding:1px 6px; border-radius:4px; font-size:13px; }
+
+  footer.page-footer{
+    margin-top:48px; padding-top:20px; border-top:1px solid var(--border);
+    color:var(--ink-muted); font-size:12.5px; text-align:center;
+  }
+
+  /* modal */
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(11,11,11,0.55);
+    display:flex; align-items:center; justify-content:center;
+    z-index:1000; padding:24px;
+  }
+  .modal-overlay.hidden{ display:none !important; }
+  .modal{
+    background:var(--surface); border:1px solid var(--border); border-radius:12px;
+    width:min(1100px, 100%); height:min(760px, 90vh);
+    display:flex; flex-direction:column; overflow:hidden; box-shadow:var(--shadow);
+  }
+  .modal-header{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:12px 16px; border-bottom:1px solid var(--border);
+  }
+  .modal-header .modal-title{ font-size:14px; font-weight:600; color:var(--ink); }
+  .modal-header .modal-title .badge{ margin-left:8px; }
+  .modal-close{
+    border:none; background:transparent; color:var(--ink-muted); cursor:pointer;
+    width:32px; height:32px; border-radius:8px; display:flex; align-items:center; justify-content:center;
+    font-size:16px;
+  }
+  .modal-close:hover{ background:var(--t1-bg); color:var(--accent); }
+  .modal-body{ flex:1; background:#000; }
+  .modal-body iframe{ width:100%; height:100%; border:none; display:block; }
+
+  @media (max-width:640px){
+    .toolbar{ flex-direction:column; align-items:stretch; }
+    .actions-row{ align-items:flex-start; }
+  }
+</style>
 </head>
 <body>
-    <canvas id="carCanvas"></canvas>
-    <div id="verticalButtons">
-        <button onclick="save()" title="Save the best car's brain to memory">💾</button>
-        <button onclick="saveAndRestart()" title="Save brain and restart with next generation">💾🔄</button>
-        <button onclick="discard()" title="Delete saved brain from memory">🗑️</button>
-        <button onclick="restartSimulation()" title="Restart simulation (keeps saved brain)">🔄</button>
-        <button onclick="toggleSettings()" title="Open settings panel">⚙️</button>
-        <button onclick="toggleHelp()" title="How does this work?">❓</button>
+<div class="wrap">
+
+  <header class="top">
+    <h1>Self-Driving Car Bench</h1>
+    <p class="subtitle">One repo. One prompt. One shot. What can a model ship?</p>
+    <nav class="links">
+      <a href="base/index.html" target="_blank" rel="noopener">Original game</a>
+      <span class="sep">·</span>
+      <a href="https://github.com/CaNopyEU/self-driving-car" target="_blank" rel="noopener">GitHub</a>
+      <span class="sep">·</span>
+      <a href="tasks/T1-gameify.md" target="_blank" rel="noopener">T1 — Game-ify</a>
+      <a href="tasks/T2-gameify-3d.md" target="_blank" rel="noopener">T2 — Game-ify in 3D</a>
+    </nav>
+  </header>
+
+  <div class="toolbar" id="toolbar">
+    <div class="filter-groups">
+      <div class="filter-group" id="task-filter">
+        <span class="fg-label">Task</span>
+      </div>
+      <div class="filter-group" id="model-filter">
+        <span class="fg-label">Model</span>
+      </div>
     </div>
-    <canvas id="networkCanvas"></canvas>
-
-    <div id="settingsPanel" class="collapsed">
-        <div id="settingsHeader">
-            <span>Settings</span>
-            <button onclick="toggleSettings()">&times;</button>
-        </div>
-        <div id="settingsBody">
-            <fieldset>
-                <legend>Auto & Physics</legend>
-                <label title="How many AI cars train at once. More = better chance to find a good driver, but slower.">Population (N)
-                    <input type="number" id="cfg-N" min="1" max="500" step="1">
-                </label>
-                <label title="Top speed of AI cars. Higher = faster but harder to control.">Max Speed
-                    <span class="range-row">
-                        <input type="range" id="cfg-maxSpeedAI" min="0.5" max="10" step="0.5">
-                        <span class="range-val"></span>
-                    </span>
-                </label>
-                <label title="How quickly cars speed up. Higher = more responsive, but less stable.">Acceleration
-                    <span class="range-row">
-                        <input type="range" id="cfg-acceleration" min="0.05" max="1" step="0.05">
-                        <span class="range-val"></span>
-                    </span>
-                </label>
-                <label title="How quickly cars slow down naturally. Higher = more drag, cars brake sooner.">Friction
-                    <span class="range-row">
-                        <input type="range" id="cfg-friction" min="0.01" max="0.2" step="0.01">
-                        <span class="range-val"></span>
-                    </span>
-                </label>
-                <label title="How sharply cars can turn. Higher = tighter turns, but easier to lose control.">Steering
-                    <span class="range-row">
-                        <input type="range" id="cfg-steeringSensitivity" min="0.01" max="0.1" step="0.005">
-                        <span class="range-val"></span>
-                    </span>
-                </label>
-            </fieldset>
-
-            <fieldset>
-                <legend>Traffic</legend>
-                <label title="Speed of obstacle cars. Higher = harder to avoid.">Traffic Speed
-                    <span class="range-row">
-                        <input type="range" id="cfg-trafficSpeed" min="0.5" max="5" step="0.5">
-                        <span class="range-val"></span>
-                    </span>
-                </label>
-                <label title="Number of lanes on the road. More lanes = more room but also more traffic.">Lane Count
-                    <input type="number" id="cfg-laneCount" min="2" max="6" step="1">
-                </label>
-            </fieldset>
-
-            <fieldset>
-                <legend>Neural Network</legend>
-                <label title="How much the brain changes between generations. Low = small tweaks, high = wild changes.">Mutation Rate
-                    <span class="range-row">
-                        <input type="range" id="cfg-mutationRate" min="0" max="1" step="0.05">
-                        <span class="range-val"></span>
-                    </span>
-                </label>
-                <label title="Neurons in the hidden layer — the brain's thinking capacity. More = smarter but slower to train.">Hidden Neurons
-                    <input type="number" id="cfg-hiddenNeurons" min="2" max="20" step="1">
-                </label>
-                <label title="Number of sensor rays the car uses to 'see' obstacles ahead.">Ray Count
-                    <input type="number" id="cfg-rayCount" min="1" max="15" step="1">
-                </label>
-                <label title="How far each sensor ray can detect obstacles. Longer = sees further ahead.">Ray Length
-                    <span class="range-row">
-                        <input type="range" id="cfg-rayLength" min="50" max="400" step="10">
-                        <span class="range-val"></span>
-                    </span>
-                </label>
-                <label title="Bonus fitness points per overtaken car. 0 = only distance matters. Higher = reward traffic weaving.">Overtake Weight
-                    <span class="range-row">
-                        <input type="range" id="cfg-overtakeWeight" min="0" max="200" step="10">
-                        <span class="range-val"></span>
-                    </span>
-                </label>
-                <label title="Angle of the sensor cone. Wider = sees more to the sides, narrower = focused ahead.">Ray Spread (°)
-                    <span class="range-row">
-                        <input type="range" id="cfg-raySpread" min="30" max="360" step="10">
-                        <span class="range-val"></span>
-                    </span>
-                </label>
-            </fieldset>
-
-            <fieldset>
-                <legend>Visual & Simulation</legend>
-                <label title="Transparency of non-best cars. 0 = invisible, 1 = fully visible.">Ghost Opacity
-                    <span class="range-row">
-                        <input type="range" id="cfg-nonBestOpacity" min="0" max="1" step="0.05">
-                        <span class="range-val"></span>
-                    </span>
-                </label>
-                <label title="Run multiple simulation steps per frame. Higher = faster training but choppier visuals.">Sim Speed
-                    <span class="range-row">
-                        <input type="range" id="cfg-simSpeed" min="1" max="5" step="1">
-                        <span class="range-val"></span>
-                    </span>
-                </label>
-                <label class="checkbox-row" title="Show the yellow sensor rays on the best car.">
-                    <input type="checkbox" id="cfg-showSensors">
-                    Show Sensors
-                </label>
-                <label class="checkbox-row" title="Pause the simulation. Cars stop moving but you can still change settings.">
-                    <input type="checkbox" id="cfg-paused">
-                    Paused
-                </label>
-            </fieldset>
-
-            <div id="presets">
-                <span>Presets:</span>
-                <button class="preset-btn" onclick="loadPreset('fast')">Fast Learn</button>
-                <button class="preset-btn" onclick="loadPreset('finetune')">Fine-tune</button>
-                <button class="preset-btn" onclick="loadPreset('wide')">Wide Road</button>
-                <button class="preset-btn" onclick="loadPreset('default')">Default</button>
-            </div>
-            <button id="applyBtn" onclick="applySettings()">Apply & Restart</button>
-        </div>
+    <div class="view-toggle" id="view-toggle">
+      <button type="button" data-view="cards" class="active">Cards</button>
+      <button type="button" data-view="table">Table</button>
     </div>
+  </div>
 
-    <div id="helpOverlay" class="hidden" onclick="if(event.target===this)toggleHelp()">
-        <div id="helpContent">
-            <button id="helpClose" onclick="toggleHelp()">&times;</button>
-            <h2>Self-Driving Car Simulator</h2>
-            <p>Cars learn to drive by themselves using a <strong>neural network</strong> — a simple artificial brain inspired by how real neurons work.</p>
+  <div id="empty-state" class="empty-state hidden">
+    <h2>No runs yet — see bench/run.ts</h2>
+    <p>The ledger at <code>runs/index.json</code> is empty (or couldn't be loaded).</p>
+    <p>Note: fetching <code>runs/index.json</code> requires serving this page over HTTP — opening
+       <code>index.html</code> directly as a <code>file://</code> URL will fail due to CORS/fetch
+       restrictions. Try <code>bun bench/serve.ts</code> from the repo root.</p>
+  </div>
 
-            <h3>How it works</h3>
-            <ol>
-                <li><strong>Sensors</strong> — Each car has yellow rays that detect obstacles and road edges. These are the brain's "eyes".</li>
-                <li><strong>Brain</strong> — The neural network (shown on the right) takes sensor data and decides: go forward, turn left, turn right, or reverse.</li>
-                <li><strong>Selection</strong> — The car that gets the furthest without crashing is the "best" (shown in full color). All others are transparent ghosts.</li>
-                <li><strong>Evolution</strong> — Save the best brain, restart, and all new cars get slightly mutated copies. Over generations, they learn to drive!</li>
-            </ol>
+  <main id="grid" class="grid"></main>
 
-            <h3>Training workflow</h3>
-            <ol>
-                <li>Watch cars drive. The best one is highlighted automatically.</li>
-                <li>When you're happy with one, click <strong>💾 Save</strong> to remember its brain.</li>
-                <li>Click <strong>🔄 Restart</strong> — new cars spawn with mutations of the saved brain.</li>
-                <li>Repeat! Each generation should get better.</li>
-                <li>Click <strong>🗑️ Discard</strong> to start completely fresh.</li>
-            </ol>
+  <div id="table-wrap" class="table-wrap hidden">
+    <table class="runs-table" id="runs-table">
+      <caption>All benchmark runs</caption>
+      <thead>
+        <tr>
+          <th scope="col">Date</th>
+          <th scope="col">Task</th>
+          <th scope="col">Model</th>
+          <th scope="col">Harness</th>
+          <th scope="col">Tokens</th>
+          <th scope="col">Duration</th>
+          <th scope="col">Cost</th>
+          <th scope="col">Diff</th>
+          <th scope="col">Playability</th>
+          <th scope="col">Creativity</th>
+          <th scope="col">Visual</th>
+          <th scope="col">Task fit</th>
+          <th scope="col">First try</th>
+          <th scope="col">Smoke</th>
+          <th scope="col">Play</th>
+          <th scope="col">Result</th>
+        </tr>
+      </thead>
+      <tbody id="table-body"></tbody>
+    </table>
+  </div>
 
-            <h3>Neural network display</h3>
-            <p>The black panel on the right shows the best car's brain in real-time:</p>
-            <ul>
-                <li><strong>Bottom nodes</strong> — sensor inputs (how close obstacles are)</li>
-                <li><strong>Middle nodes</strong> — hidden layer (the "thinking" part)</li>
-                <li><strong>Top nodes</strong> — outputs: ↑ forward, ← left, → right, ↓ reverse</li>
-                <li><strong>Yellow lines</strong> — positive connections (encouraging)</li>
-                <li><strong>Blue lines</strong> — negative connections (inhibiting)</li>
-                <li><strong>Dashed circles</strong> — neuron bias (activation threshold)</li>
-            </ul>
+  <footer class="page-footer">
+    Frozen base: base-v1 · metrics are harness-reported, scores are human-reviewed
+  </footer>
+</div>
 
-            <h3>Buttons</h3>
-            <table>
-                <tr><td>💾</td><td>Save the best car's brain</td></tr>
-                <tr><td>🗑️</td><td>Delete saved brain, start fresh</td></tr>
-                <tr><td>🔄</td><td>Restart simulation (keeps saved brain)</td></tr>
-                <tr><td>⚙️</td><td>Open settings panel</td></tr>
-                <tr><td>❓</td><td>This help screen</td></tr>
-            </table>
-        </div>
+<div class="modal-overlay hidden" id="modal-overlay">
+  <div class="modal" role="dialog" aria-modal="true" aria-labelledby="modal-title-text">
+    <div class="modal-header">
+      <div class="modal-title" id="modal-title-text"></div>
+      <button type="button" class="modal-close" id="modal-close" aria-label="Close">✕</button>
     </div>
+    <div class="modal-body">
+      <!-- runs are untrusted model-generated JS on this same origin: sandbox WITHOUT
+           allow-same-origin (blocks top-navigation, our localStorage, service workers);
+           canvas/keyboard/audio games still work. Storage inside games is best-effort
+           by protocol — see tasks/. -->
+      <iframe id="modal-iframe" title="Run preview" src="about:blank" sandbox="allow-scripts allow-pointer-lock"></iframe>
+    </div>
+  </div>
+</div>
 
-    <script src="config.js"></script>
-    <script src="visualizer.js"></script>
-    <script src="network.js"></script>
-    <script src="sensor.js"></script>
-    <script src="utils.js"></script>
-    <script src="road.js"></script>
-    <script src="controls.js"></script>
-    <script src="car.js"></script>
-    <script src="settings.js"></script>
-    <script src="main.js"></script>
+<script>
+(function(){
+  "use strict";
+
+  var RUBRIC = {
+    playability: ["broken / unplayable","runs but no fun","playable, holds attention a few minutes","genuinely fun, would replay","I forgot I was evaluating"],
+    creativity: ["copied the brief literally, nothing more","one small own idea","solid ideas within the brief","a surprising mechanic that works","an idea I'd never have suggested"],
+    visual: ["untouched or worse","minor cosmetics","clearly improved","polished, coherent style","ship-it beautiful"],
+    taskFit: ["ignored requirements","several requirements missing","requirements met","met + meaningfully extended","nailed the spirit, not just the letter"]
+  };
+
+  function rubricTitle(dim){
+    return RUBRIC[dim].map(function(t,i){ return (i+1) + ": " + t; }).join(" · ");
+  }
+
+  function h(tag, props, children){
+    var el = document.createElement(tag);
+    props = props || {};
+    for (var k in props){
+      if (!Object.prototype.hasOwnProperty.call(props, k)) continue;
+      var v = props[k];
+      if (v === null || v === undefined) continue;
+      if (k === "className"){ el.className = v; }
+      else if (k === "text"){ el.textContent = v; }
+      else if (k === "onClick"){ el.addEventListener("click", v); }
+      else if (k === "dataset"){ for (var dk in v){ el.dataset[dk] = v[dk]; } }
+      else { el.setAttribute(k, v); }
+    }
+    (children || []).forEach(function(c){
+      if (c === null || c === undefined) return;
+      if (typeof c === "string"){ el.appendChild(document.createTextNode(c)); }
+      else { el.appendChild(c); }
+    });
+    return el;
+  }
+
+  function displayModel(model){
+    if (!model) return "unknown";
+    var idx = model.indexOf("/");
+    return idx === -1 ? model : model.slice(idx + 1);
+  }
+
+  function fmtTokens(input, output){
+    var total = (input || 0) + (output || 0);
+    if (total >= 1000000) return (total / 1000000).toFixed(total % 1000000 === 0 ? 0 : 1) + "M";
+    if (total >= 1000) return Math.round(total / 1000) + "K";
+    return String(total);
+  }
+
+  function fmtDuration(sec){
+    if (sec === null || sec === undefined) return "—";
+    sec = Math.round(sec);
+    var h = Math.floor(sec / 3600);
+    var m = Math.floor((sec % 3600) / 60);
+    var s = sec % 60;
+    if (h > 0) return h + "h " + m + "m";
+    if (m > 0) return m + "m " + s + "s";
+    return s + "s";
+  }
+
+  function fmtCost(cost){
+    if (cost === null || cost === undefined) return "—";
+    return "$" + cost.toFixed(2);
+  }
+
+  function fmtDiff(diff){
+    if (!diff) return "—";
+    var ins = diff.insertions || 0, del = diff.deletions || 0;
+    return "+" + ins + "/−" + del;
+  }
+
+  function badgeForTask(task){
+    var cls = task === "T1" ? "badge-t1" : task === "T2" ? "badge-t2" : "badge-t3";
+    return h("span", { className: "badge " + cls, text: task });
+  }
+
+  function firstTryChip(firstTry){
+    if (firstTry === null || firstTry === undefined){
+      return h("span", { className: "status-chip muted", text: "pending" });
+    }
+    if (firstTry === true){
+      return h("span", { className: "status-chip good", text: "✓ first try" });
+    }
+    return h("span", { className: "status-chip serious", text: "✗ needed fixes" });
+  }
+
+  function smokeChip(smoke){
+    if (!smoke || smoke.loads === null || smoke.loads === undefined){
+      return h("span", { className: "status-chip muted", text: "not yet smoke-tested" });
+    }
+    if (smoke.loads === true){
+      var errs = smoke.consoleErrors || 0;
+      return h("span", { className: "status-chip good", text: "✓ loads, " + errs + " error" + (errs === 1 ? "" : "s") });
+    }
+    return h("span", { className: "status-chip critical", text: "✗ did not load" });
+  }
+
+  function scorePair(label, dim, value){
+    var labelEl = h("span", { className: "score-label", title: rubricTitle(dim), text: label });
+    var valEl = h("span", { className: "score-val", text: (value === null || value === undefined) ? "—" : (value + "/5") });
+    return h("span", { className: "score" }, [labelEl, " ", valEl]);
+  }
+
+  var state = {
+    runs: [],
+    task: "All",
+    model: "All",
+    view: "cards"
+  };
+
+  var els = {
+    grid: document.getElementById("grid"),
+    tableWrap: document.getElementById("table-wrap"),
+    tableBody: document.getElementById("table-body"),
+    emptyState: document.getElementById("empty-state"),
+    toolbar: document.getElementById("toolbar"),
+    taskFilter: document.getElementById("task-filter"),
+    modelFilter: document.getElementById("model-filter"),
+    viewToggle: document.getElementById("view-toggle"),
+    modalOverlay: document.getElementById("modal-overlay"),
+    modalIframe: document.getElementById("modal-iframe"),
+    modalTitle: document.getElementById("modal-title-text"),
+    modalClose: document.getElementById("modal-close")
+  };
+
+  function buildFilterChips(){
+    els.taskFilter.querySelectorAll(".chip").forEach(function(c){ c.remove(); });
+    els.modelFilter.querySelectorAll(".chip").forEach(function(c){ c.remove(); });
+
+    var tasks = ["All", "T1", "T2"];
+    tasks.forEach(function(t){
+      var chip = h("button", {
+        type: "button",
+        className: "chip" + (state.task === t ? " active" : ""),
+        text: t,
+        onClick: function(){ state.task = t; render(); }
+      });
+      els.taskFilter.appendChild(chip);
+    });
+
+    var models = Array.from(new Set(state.runs.map(function(r){ return r.model; }).filter(Boolean))).sort();
+    var modelOptions = ["All"].concat(models);
+    modelOptions.forEach(function(m){
+      var chip = h("button", {
+        type: "button",
+        className: "chip" + (state.model === m ? " active" : ""),
+        text: m === "All" ? "All" : displayModel(m),
+        title: m === "All" ? null : m,
+        onClick: function(){ state.model = m; render(); }
+      });
+      els.modelFilter.appendChild(chip);
+    });
+  }
+
+  function filteredSortedRuns(){
+    return state.runs
+      .filter(function(r){ return state.task === "All" || r.task === state.task; })
+      .filter(function(r){ return state.model === "All" || r.model === state.model; })
+      .slice()
+      .sort(function(a, b){ return (b.date || "").localeCompare(a.date || ""); });
+  }
+
+  function buildPlaceholder(run){
+    return h("div", { className: "placeholder" }, [
+      h("div", { text: "no preview" }),
+      h("div", { className: "model-name", text: displayModel(run.model) })
+    ]);
+  }
+
+  function buildPreview(run){
+    var preview = h("div", { className: "card-preview", onClick: function(){ openModal(run); } });
+    if (run.media && run.media.gif){
+      var img = h("img", { src: "runs/" + run.id + "/" + run.media.gif, alt: displayModel(run.model) + " preview", loading: "lazy" });
+      img.addEventListener("error", function(){
+        img.remove();
+        preview.insertBefore(buildPlaceholder(run), preview.firstChild);
+      });
+      preview.appendChild(img);
+    } else {
+      preview.appendChild(buildPlaceholder(run));
+    }
+    var playHint = h("div", { className: "play-hint" }, [
+      (function(){
+        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        svg.setAttribute("viewBox", "0 0 24 24");
+        svg.setAttribute("fill", "#ffffff");
+        var poly = document.createElementNS("http://www.w3.org/2000/svg", "polygon");
+        poly.setAttribute("points", "6,4 20,12 6,20");
+        svg.appendChild(poly);
+        return svg;
+      })()
+    ]);
+    preview.appendChild(playHint);
+    return preview;
+  }
+
+  function buildCard(run){
+    var titleRow = h("div", { className: "card-title-row" }, [
+      h("div", { className: "card-title", title: run.model, text: displayModel(run.model) }),
+      badgeForTask(run.task)
+    ]);
+
+    var meta = h("div", { className: "card-meta" }, [
+      h("span", { text: run.date || "—" }),
+      h("span", { text: (run.harness && run.harness.name) ? (run.harness.name + " " + (run.harness.version || "")) : "—" })
+    ]);
+
+    var tokens = run.metrics && run.metrics.tokens ? run.metrics.tokens : {};
+    var statTiles = h("div", { className: "stat-tiles" }, [
+      h("div", { className: "stat-tile" }, [
+        h("div", { className: "stat-label", text: "Tokens" }),
+        h("div", { className: "stat-value", text: fmtTokens(tokens.input, tokens.output) })
+      ]),
+      h("div", { className: "stat-tile" }, [
+        h("div", { className: "stat-label", text: "Duration" }),
+        h("div", { className: "stat-value", text: fmtDuration(run.metrics ? run.metrics.durationSeconds : null) })
+      ]),
+      h("div", { className: "stat-tile" }, [
+        h("div", { className: "stat-label", text: "Cost" }),
+        h("div", { className: "stat-value", text: fmtCost(run.metrics ? run.metrics.costUsd : null) })
+      ]),
+      h("div", { className: "stat-tile" }, [
+        h("div", { className: "stat-label", text: "Diff" }),
+        h("div", { className: "stat-value", text: fmtDiff(run.diff) })
+      ])
+    ]);
+
+    var review = run.review || {};
+    var hasReview = review.playability !== null && review.playability !== undefined ||
+                     review.creativity !== null && review.creativity !== undefined ||
+                     review.visual !== null && review.visual !== undefined ||
+                     review.taskFit !== null && review.taskFit !== undefined;
+
+    var reviewRow;
+    if (hasReview){
+      reviewRow = h("div", { className: "review-row" }, [
+        scorePair("Playability", "playability", review.playability),
+        scorePair("Creativity", "creativity", review.creativity),
+        scorePair("Visual", "visual", review.visual),
+        scorePair("Task fit", "taskFit", review.taskFit)
+      ]);
+    } else {
+      reviewRow = h("div", { className: "review-row" }, [
+        h("span", { className: "awaiting", text: "awaiting review" })
+      ]);
+    }
+
+    var statusRow = h("div", { className: "status-row" }, [
+      firstTryChip(review.firstTry),
+      smokeChip(run.smoke)
+    ]);
+
+    var playBtn = h("button", {
+      type: "button",
+      className: "btn-play",
+      onClick: function(){ openModal(run); }
+    }, [h("span", { text: "▶ Play" })]);
+
+    var resultLink = h("a", {
+      className: "result-link",
+      href: "runs/" + run.id + "/RESULT.md",
+      text: "RESULT.md"
+    });
+
+    var actionsRow = h("div", { className: "actions-row" }, [
+      h("div", { className: "actions-left" }, [playBtn, resultLink])
+    ]);
+
+    var body = h("div", { className: "card-body" }, [
+      titleRow, meta, statTiles, reviewRow, statusRow, actionsRow
+    ]);
+
+    return h("div", { className: "card" }, [buildPreview(run), body]);
+  }
+
+  function renderGrid(runs){
+    els.grid.innerHTML = "";
+    runs.forEach(function(run){ els.grid.appendChild(buildCard(run)); });
+  }
+
+  function tableCell(text, numeric){
+    return h("td", { className: numeric ? "num" : null, text: text });
+  }
+
+  function renderTable(runs){
+    els.tableBody.innerHTML = "";
+    runs.forEach(function(run){
+      var review = run.review || {};
+      var tokens = run.metrics && run.metrics.tokens ? run.metrics.tokens : {};
+      var tr = h("tr", null, [
+        tableCell(run.date || "—"),
+        (function(){ var td = h("td", null, [badgeForTask(run.task)]); return td; })(),
+        h("td", { title: run.model, text: displayModel(run.model) }),
+        tableCell((run.harness && run.harness.name) ? (run.harness.name + " " + (run.harness.version || "")) : "—"),
+        tableCell(fmtTokens(tokens.input, tokens.output), true),
+        tableCell(fmtDuration(run.metrics ? run.metrics.durationSeconds : null), true),
+        tableCell(fmtCost(run.metrics ? run.metrics.costUsd : null), true),
+        tableCell(fmtDiff(run.diff), true),
+        tableCell(review.playability != null ? review.playability + "/5" : "—", true),
+        tableCell(review.creativity != null ? review.creativity + "/5" : "—", true),
+        tableCell(review.visual != null ? review.visual + "/5" : "—", true),
+        tableCell(review.taskFit != null ? review.taskFit + "/5" : "—", true),
+        (function(){ return h("td", null, [firstTryChip(review.firstTry)]); })(),
+        (function(){ return h("td", null, [smokeChip(run.smoke)]); })(),
+        (function(){
+          var btn = h("button", { type: "button", className: "chip", text: "Play", onClick: function(){ openModal(run); } });
+          return h("td", null, [btn]);
+        })(),
+        (function(){
+          var a = h("a", { href: "runs/" + run.id + "/RESULT.md", text: "RESULT.md" });
+          return h("td", null, [a]);
+        })()
+      ]);
+      els.tableBody.appendChild(tr);
+    });
+  }
+
+  function render(){
+    buildFilterChips();
+    var runs = filteredSortedRuns();
+    renderGrid(runs);
+    renderTable(runs);
+    els.grid.classList.toggle("hidden", state.view !== "cards");
+    els.tableWrap.classList.toggle("hidden", state.view !== "table");
+  }
+
+  function openModal(run){
+    els.modalTitle.textContent = "";
+    els.modalTitle.appendChild(document.createTextNode(displayModel(run.model) + " "));
+    els.modalTitle.appendChild(badgeForTask(run.task));
+    els.modalIframe.src = "runs/" + run.id + "/index.html";
+    els.modalOverlay.classList.remove("hidden");
+  }
+
+  function closeModal(){
+    els.modalOverlay.classList.add("hidden");
+    els.modalIframe.src = "about:blank";
+  }
+
+  els.modalClose.addEventListener("click", closeModal);
+  els.modalOverlay.addEventListener("click", function(e){
+    if (e.target === els.modalOverlay) closeModal();
+  });
+  document.addEventListener("keydown", function(e){
+    if (e.key === "Escape" && !els.modalOverlay.classList.contains("hidden")) closeModal();
+  });
+
+  els.viewToggle.querySelectorAll("button").forEach(function(btn){
+    btn.addEventListener("click", function(){
+      state.view = btn.dataset.view;
+      els.viewToggle.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b === btn); });
+      render();
+    });
+  });
+
+  function showEmpty(){
+    els.emptyState.classList.remove("hidden");
+    els.toolbar.classList.add("hidden");
+    els.grid.classList.add("hidden");
+    els.tableWrap.classList.add("hidden");
+  }
+
+  function init(runs){
+    if (!runs || runs.length === 0){
+      showEmpty();
+      return;
+    }
+    state.runs = runs;
+    render();
+  }
+
+  fetch("runs/index.json", { cache: "no-store" })
+    .then(function(res){
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      return res.json();
+    })
+    .then(function(data){ init(Array.isArray(data) ? data : []); })
+    .catch(function(){ init([]); });
+
+})();
+</script>
 </body>
 </html>

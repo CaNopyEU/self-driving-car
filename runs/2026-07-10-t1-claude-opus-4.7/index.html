@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <title>NEURAL RUSH</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="gameWrap">
+        <canvas id="carCanvas"></canvas>
+        <div id="hud">
+            <div class="hud-block"><div class="hud-label">SCORE</div><div id="hudScore" class="hud-val">0</div></div>
+            <div class="hud-block"><div class="hud-label">BEST</div><div id="hudBest" class="hud-val">0</div></div>
+            <div class="hud-block"><div class="hud-label">LEVEL</div><div id="hudLevel" class="hud-val">1</div></div>
+            <div class="hud-block"><div class="hud-label">SPEED</div><div id="hudSpeed" class="hud-val">0</div></div>
+            <div class="hud-block"><div class="hud-label">LIVES</div><div id="hudLives" class="hud-val">♥♥♥</div></div>
+            <div class="hud-block hud-combo"><div class="hud-label">COMBO</div><div id="hudCombo" class="hud-val">x1</div></div>
+        </div>
+        <div id="levelBanner"></div>
+        <div id="overlay" class="show">
+            <div id="overlayCard">
+                <h1>NEURAL RUSH</h1>
+                <p class="tag">Weave through traffic. Outrun the hunters. Chase the high score.</p>
+                <div class="controls">
+                    <div><kbd>↑</kbd> / <kbd>W</kbd> Accelerate</div>
+                    <div><kbd>↓</kbd> / <kbd>S</kbd> Brake / Reverse</div>
+                    <div><kbd>←→</kbd> / <kbd>AD</kbd> Steer</div>
+                    <div><kbd>SHIFT</kbd> Boost (drains fuel)</div>
+                    <div><kbd>P</kbd> Pause · <kbd>M</kbd> Mute</div>
+                </div>
+                <button id="startBtn">START</button>
+                <p class="hint">Grab <span class="coin">◆</span> coins for fuel + points · Near-misses build COMBO · Red cars are neural hunters — they will chase you.</p>
+            </div>
+        </div>
+    </div>
+
+    <script src="config.js"></script>
+    <script src="network.js"></script>
+    <script src="sensor.js"></script>
+    <script src="utils.js"></script>
+    <script src="road.js"></script>
+    <script src="controls.js"></script>
+    <script src="car.js"></script>
+    <script src="main.js"></script>
+</body>
+</html>
