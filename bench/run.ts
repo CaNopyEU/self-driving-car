@@ -224,9 +224,19 @@ if (exitCode !== 0) {
 }
 
 // ---------------------------------------------------------------- sanity guards
-if (repoStatus() !== repoStatusBefore) {
+// New/changed paths under runs/ are benign (concurrent runs publishing, the user
+// filling in reviews mid-run) — only changes OUTSIDE runs/ mean a leak.
+const statusBefore = new Set(repoStatusBefore.split("\n").filter(Boolean));
+const leaked = repoStatus()
+  .split("\n")
+  .filter(Boolean)
+  .filter((line) => !statusBefore.has(line))
+  .flatMap((line) => line.slice(3).split(" -> "))
+  .filter((p) => !p.replace(/^"|"$/g, "").startsWith("runs/"));
+if (leaked.length > 0) {
   console.error("\n✗ the bench repo itself changed during the run — the harness leaked outside");
-  console.error("  its workdir. Nothing recorded; inspect `git status` here and the workdir:");
+  console.error(`  its workdir. Unexpected changes: ${leaked.join(", ")}`);
+  console.error("  Nothing recorded; inspect `git status` here and the workdir:");
   console.error(`  workdir ${work}\n  transcript ${transcriptPath}`);
   abort(1);
 }

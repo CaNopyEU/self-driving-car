@@ -1,0 +1,46 @@
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%;overflow:hidden;background:#0d1117;font-family:"Courier New",monospace}
+#gameCanvas{display:block;position:fixed;inset:0}
+
+.overlay{
+    position:fixed;inset:0;display:flex;align-items:center;justify-content:center;
+    background:rgba(6,10,16,0.72);backdrop-filter:blur(3px);z-index:10;
+}
+.overlay.hidden{display:none}
+
+.panel{
+    text-align:center;color:#e6edf3;padding:38px 46px;
+    background:rgba(13,17,23,0.92);border:2px solid #2980ff;border-radius:14px;
+    box-shadow:0 0 40px rgba(41,128,255,0.35);
+    animation:pop .3s ease-out;
+    max-width:92vw;
+}
+@keyframes pop{from{transform:scale(.92);opacity:0}to{transform:scale(1);opacity:1}}
+
+h1{
+    font-size:44px;line-height:1.05;letter-spacing:4px;color:#2980ff;
+    text-shadow:0 0 18px rgba(41,128,255,0.7);margin-bottom:10px;
+}
+h1.crash{color:#ff4d4d;text-shadow:0 0 18px rgba(255,77,77,0.7)}
+
+.tag{color:#8b949e;margin-bottom:18px;font-size:14px}
+
+.rules{list-style:none;text-align:left;margin:0 auto 22px;font-size:14px;line-height:1.9;color:#c9d1d9;display:inline-block}
+.rules b{color:#ffd23f}
+.elite{color:#ff2d6f;font-weight:bold}
+
+button{
+    font-family:inherit;font-size:20px;font-weight:bold;letter-spacing:2px;
+    padding:12px 34px;color:#0d1117;background:#2980ff;border:none;border-radius:8px;
+    cursor:pointer;transition:transform .1s,box-shadow .1s;
+    box-shadow:0 0 16px rgba(41,128,255,0.6);
+}
+button:hover{transform:scale(1.06);box-shadow:0 0 26px rgba(41,128,255,0.9)}
+button:active{transform:scale(0.97)}
+
+.best{margin-top:14px;color:#ffd23f;font-size:14px;letter-spacing:2px}
+
+#finalStats{font-size:16px;line-height:2;margin-bottom:22px;color:#c9d1d9}
+#finalStats b{color:#ffd23f;font-size:24px}
+#finalStats .hs{color:#7fff6a;font-weight:bold;animation:blink 0.8s infinite}
+@keyframes blink{50%{opacity:0.25}}

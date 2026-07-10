@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>NEON RUSH — 3D Highway Arcade</title>
+<link rel="stylesheet" href="style.css">
+<script type="importmap">
+{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.160.0/build/three.module.js" } }
+</script>
+</head>
+<body>
+<div id="app">
+  <canvas id="game"></canvas>
+
+  <!-- HUD -->
+  <div id="hud" class="hidden">
+    <div id="hud-left">
+      <div id="score">0</div>
+      <div id="hud-sub">SCORE</div>
+    </div>
+    <div id="hud-center">
+      <div id="combo" class="hidden">x1</div>
+      <div id="toast"></div>
+    </div>
+    <div id="hud-right">
+      <div id="level">LVL 1</div>
+      <div id="speed">0 km/h</div>
+      <div id="shield-row">SHIELD <span id="shields">◆◆◆</span></div>
+    </div>
+  </div>
+  <div id="boost-bar"><div id="boost-fill"></div></div>
+
+  <!-- Start screen -->
+  <div id="menu" class="overlay">
+    <h1>NEON&nbsp;RUSH</h1>
+    <p class="tag">Outrun the adaptive traffic. It learns. You'd better be faster.</p>
+    <div class="controls-help">
+      <div><kbd>←</kbd><kbd>→</kbd> / <kbd>A</kbd><kbd>D</kbd> — steer</div>
+      <div><kbd>↑</kbd> / <kbd>W</kbd> — boost &nbsp;•&nbsp; <kbd>↓</kbd> / <kbd>S</kbd> — brake</div>
+      <div><kbd>C</kbd> — camera &nbsp;•&nbsp; <kbd>M</kbd> — mute &nbsp;•&nbsp; <kbd>P</kbd> — pause</div>
+    </div>
+    <p class="tip">Near-misses build your combo. Pick up <span class="c-cyan">◆ shields</span> and <span class="c-yellow">⬢ boost</span>.</p>
+    <button id="btn-start">START ENGINE</button>
+    <p id="hiscore-line" class="tip"></p>
+  </div>
+
+  <!-- Game over -->
+  <div id="gameover" class="overlay hidden">
+    <h1 class="crash">WRECKED</h1>
+    <div id="final-score">0</div>
+    <div id="final-stats"></div>
+    <p id="new-record" class="hidden c-yellow">★ NEW RECORD ★</p>
+    <button id="btn-restart">DRIVE AGAIN</button>
+  </div>
+
+  <!-- Pause -->
+  <div id="paused" class="overlay hidden">
+    <h1>PAUSED</h1>
+    <p class="tip">press P to resume</p>
+  </div>
+</div>
+<script type="module" src="game.js"></script>
+</body>
+</html>
