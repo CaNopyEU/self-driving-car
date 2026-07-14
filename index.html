@@ -95,6 +95,8 @@
   }
   .view-toggle button.active{ background:var(--t1-bg); color:var(--accent); }
 
+  .toolbar-right{ display:flex; gap:10px; align-items:center; }
+
   .grid{
     display:grid;
     grid-template-columns:repeat(auto-fill, minmax(340px, 1fr));
@@ -189,6 +191,14 @@
     transition:background .12s ease, color .12s ease;
   }
   .btn-play:hover{ background:var(--accent); color:var(--accent-ink); }
+  .btn-present{
+    display:inline-flex; align-items:center; gap:6px;
+    border:1px solid var(--accent); color:var(--accent); background:transparent;
+    font-family:inherit; font-size:13px; font-weight:600;
+    padding:6px 14px; border-radius:999px; cursor:pointer;
+    transition:background .12s ease, color .12s ease;
+  }
+  .btn-present:hover{ background:var(--accent); color:var(--accent-ink); }
   .result-link{ font-size:13px; }
   .diff-text{ font-size:12px; color:var(--ink-muted); }
 
@@ -248,6 +258,58 @@
     .toolbar{ flex-direction:column; align-items:stretch; }
     .actions-row{ align-items:flex-start; }
   }
+
+  /* presentation mode */
+  #present-overlay{
+    position:fixed; inset:0; z-index:2000;
+    background:#0a0a0a; display:flex; flex-direction:column;
+  }
+  #present-overlay.hidden{ display:none !important; }
+  .present-top{
+    display:flex; align-items:center; justify-content:space-between;
+    gap:12px; height:56px; min-height:56px; padding:0 16px;
+    border-bottom:1px solid rgba(255,255,255,0.14);
+    color:#fff;
+  }
+  .present-left{ display:flex; align-items:center; gap:10px; font-size:14px; font-weight:600; }
+  .present-left .badge-t1, .present-left .badge-t2, .present-left .badge-t3{ background:rgba(255,255,255,0.12); color:#fff; }
+  .present-right{ display:flex; align-items:center; gap:8px; }
+  .present-hint{ color:#c3c2b7; font-size:12px; margin-right:4px; }
+  @media (max-width:900px){ .present-hint{ display:none; } }
+  .present-btn2{
+    display:inline-flex; align-items:center; gap:6px;
+    border:1px solid rgba(255,255,255,0.14); color:#fff; background:transparent;
+    font-family:inherit; font-size:13px; font-weight:600;
+    padding:8px 14px; min-height:40px; border-radius:8px; cursor:pointer;
+    transition:background .12s ease, opacity .12s ease;
+  }
+  .present-btn2:hover{ background:rgba(255,255,255,0.12); }
+  .present-btn2:disabled{ opacity:0.4; cursor:default; pointer-events:none; }
+  .present-btn2.reveal{ background:#3987e5; border-color:#3987e5; color:#fff; font-size:15px; padding:8px 20px; }
+  .present-btn2.reveal:hover{ background:#3987e5; opacity:0.85; }
+  .present-stage{ position:relative; flex:1; background:#000; }
+  #present-iframe{ width:100%; height:100%; border:none; display:block; background:#000; }
+  #present-reveal{
+    position:absolute; inset:0; background:rgba(0,0,0,0.85);
+    display:flex; align-items:center; justify-content:center;
+    cursor:pointer;
+  }
+  #present-reveal.hidden{ display:none !important; }
+  .present-reveal-card{ text-align:center; color:#fff; padding:24px; max-width:720px; }
+  .present-reveal-name{ font-size:clamp(32px, 6vw, 64px); font-weight:800; margin:0 0 6px; }
+  .present-reveal-full{ font-size:14px; color:#c3c2b7; margin:0 0 24px; }
+  .present-stat-tiles{
+    display:flex; flex-wrap:wrap; justify-content:center; gap:24px;
+    padding:16px 0; border-top:1px solid rgba(255,255,255,0.14); border-bottom:1px solid rgba(255,255,255,0.14);
+  }
+  .present-stat-tile{ display:flex; flex-direction:column; gap:4px; min-width:90px; }
+  .present-stat-tile .stat-label{ font-size:12px; color:#c3c2b7; text-transform:uppercase; letter-spacing:0.04em; }
+  .present-stat-tile .stat-value{ font-size:28px; font-weight:700; color:#fff; }
+  #present-reveal .review-row{ justify-content:center; font-size:13px; color:#c3c2b7; margin-top:16px; }
+  #present-reveal .review-row .score{ color:#c3c2b7; }
+  #present-reveal .review-row .score-label{ color:#c3c2b7; border-bottom-color:#c3c2b7; }
+  #present-reveal .review-row .score-val{ color:#fff; }
+  .present-footer{ margin-top:20px; font-size:12px; color:#c3c2b7; font-style:italic; }
 </style>
 </head>
 <body>
@@ -275,9 +337,12 @@
         <span class="fg-label">Model</span>
       </div>
     </div>
-    <div class="view-toggle" id="view-toggle">
-      <button type="button" data-view="cards" class="active">Cards</button>
-      <button type="button" data-view="table">Table</button>
+    <div class="toolbar-right">
+      <div class="view-toggle" id="view-toggle">
+        <button type="button" data-view="cards" class="active">Cards</button>
+        <button type="button" data-view="table">Table</button>
+      </div>
+      <button type="button" id="present-btn" class="btn-present">🎬 Present</button>
     </div>
   </div>
 
@@ -336,6 +401,25 @@
            by protocol — see tasks/. -->
       <iframe id="modal-iframe" title="Run preview" src="about:blank" sandbox="allow-scripts allow-pointer-lock"></iframe>
     </div>
+  </div>
+</div>
+
+<div id="present-overlay" class="hidden">
+  <div class="present-top">
+    <div class="present-left">
+      <span id="present-label"></span>
+    </div>
+    <div class="present-right">
+      <span class="present-hint">←/→ games · R reveal · Esc exit</span>
+      <button type="button" id="present-prev" class="present-btn2">← Prev</button>
+      <button type="button" id="present-reveal-btn" class="present-btn2 reveal">👁 Reveal</button>
+      <button type="button" id="present-next" class="present-btn2">Next →</button>
+      <button type="button" id="present-exit" class="present-btn2" aria-label="Exit presentation">✕</button>
+    </div>
+  </div>
+  <div class="present-stage">
+    <iframe id="present-iframe" title="Mystery game" src="about:blank" sandbox="allow-scripts allow-pointer-lock"></iframe>
+    <div id="present-reveal" class="hidden"></div>
   </div>
 </div>
 
@@ -449,6 +533,8 @@
     view: "cards"
   };
 
+  var present = { active: false, runs: [], idx: 0 };
+
   var els = {
     grid: document.getElementById("grid"),
     tableWrap: document.getElementById("table-wrap"),
@@ -461,7 +547,16 @@
     modalOverlay: document.getElementById("modal-overlay"),
     modalIframe: document.getElementById("modal-iframe"),
     modalTitle: document.getElementById("modal-title-text"),
-    modalClose: document.getElementById("modal-close")
+    modalClose: document.getElementById("modal-close"),
+    presentBtn: document.getElementById("present-btn"),
+    presentOverlay: document.getElementById("present-overlay"),
+    presentLabel: document.getElementById("present-label"),
+    presentIframe: document.getElementById("present-iframe"),
+    presentReveal: document.getElementById("present-reveal"),
+    presentPrev: document.getElementById("present-prev"),
+    presentNext: document.getElementById("present-next"),
+    presentRevealBtn: document.getElementById("present-reveal-btn"),
+    presentExit: document.getElementById("present-exit")
   };
 
   function buildFilterChips(){
@@ -683,6 +778,7 @@
     if (e.target === els.modalOverlay) closeModal();
   });
   document.addEventListener("keydown", function(e){
+    if (present.active) return; // presentation overlay owns Escape while it is open
     if (e.key === "Escape" && !els.modalOverlay.classList.contains("hidden")) closeModal();
   });
 
@@ -692,6 +788,149 @@
       els.viewToggle.querySelectorAll("button").forEach(function(b){ b.classList.toggle("active", b === btn); });
       render();
     });
+  });
+
+  /* presentation mode: fullscreen blind-test viewer, model identity hidden until reveal */
+  function presentLineupRuns(params){
+    var ids = (params.get("lineup") || "").split(",").map(function(s){ return s.trim(); }).filter(Boolean);
+    if (ids.length === 0) return [];
+    var byId = {};
+    state.runs.forEach(function(r){ byId[r.id] = r; });
+    return ids.map(function(id){ return byId[id]; }).filter(Boolean);
+  }
+
+  function presentRunsForEntry(){
+    var params = new URLSearchParams(window.location.search);
+    var lineup = presentLineupRuns(params);
+    return lineup.length ? lineup : filteredSortedRuns();
+  }
+
+  function enterPresentation(runs){
+    if (!runs || runs.length === 0) return;
+    present.active = true;
+    present.runs = runs;
+    present.idx = 0;
+    document.body.style.overflow = "hidden";
+    els.presentOverlay.classList.remove("hidden");
+    loadPresentRun();
+  }
+
+  function exitPresentation(){
+    present.active = false;
+    hideReveal();
+    els.presentOverlay.classList.add("hidden");
+    els.presentIframe.src = "about:blank";
+    document.body.style.overflow = "";
+  }
+
+  function loadPresentRun(){
+    var run = present.runs[present.idx];
+    if (!run) return;
+    els.presentIframe.src = "runs/" + run.id + "/index.html";
+    els.presentLabel.textContent = "";
+    var letter = String.fromCharCode(65 + present.idx);
+    els.presentLabel.appendChild(document.createTextNode("Contestant " + letter + " · " + (present.idx + 1) + " / " + present.runs.length + " "));
+    els.presentLabel.appendChild(badgeForTask(run.task));
+    hideReveal();
+    els.presentPrev.disabled = present.idx === 0;
+    els.presentNext.disabled = present.idx === present.runs.length - 1;
+  }
+
+  function buildPresentReveal(run){
+    els.presentReveal.innerHTML = "";
+    var tokens = run.metrics && run.metrics.tokens ? run.metrics.tokens : {};
+    var tiles = h("div", { className: "present-stat-tiles" }, [
+      h("div", { className: "present-stat-tile" }, [
+        h("div", { className: "stat-label", text: "Cost" }),
+        h("div", { className: "stat-value", text: fmtCost(run.metrics ? run.metrics.costUsd : null) })
+      ]),
+      h("div", { className: "present-stat-tile" }, [
+        h("div", { className: "stat-label", text: "Duration" }),
+        h("div", { className: "stat-value", text: fmtDuration(run.metrics ? run.metrics.durationSeconds : null) })
+      ]),
+      h("div", { className: "present-stat-tile" }, [
+        h("div", { className: "stat-label", text: "Tokens" }),
+        h("div", { className: "stat-value", text: fmtTokens(tokens.input, tokens.output) })
+      ]),
+      h("div", { className: "present-stat-tile" }, [
+        h("div", { className: "stat-label", text: "Diff" }),
+        h("div", { className: "stat-value", text: fmtDiff(run.diff) })
+      ])
+    ]);
+    var card = h("div", { className: "present-reveal-card" }, [
+      h("div", { className: "present-reveal-name", text: displayModel(run.model) }),
+      h("div", { className: "present-reveal-full", text: run.model || "" }),
+      tiles
+    ]);
+
+    var review = run.review || {};
+    var hasReview = review.playability !== null && review.playability !== undefined ||
+                     review.creativity !== null && review.creativity !== undefined ||
+                     review.visual !== null && review.visual !== undefined ||
+                     review.taskFit !== null && review.taskFit !== undefined;
+    if (hasReview){
+      card.appendChild(h("div", { className: "review-row" }, [
+        scorePair("Playability", "playability", review.playability),
+        scorePair("Creativity", "creativity", review.creativity),
+        scorePair("Visual", "visual", review.visual),
+        scorePair("Task fit", "taskFit", review.taskFit)
+      ]));
+    }
+    card.appendChild(h("div", { className: "present-footer", text: "click anywhere to continue" }));
+    els.presentReveal.appendChild(card);
+  }
+
+  function showReveal(){
+    var run = present.runs[present.idx];
+    if (!run) return;
+    buildPresentReveal(run);
+    els.presentReveal.classList.remove("hidden");
+  }
+
+  function hideReveal(){
+    els.presentReveal.classList.add("hidden");
+    els.presentReveal.innerHTML = "";
+  }
+
+  function toggleReveal(){
+    if (els.presentReveal.classList.contains("hidden")) showReveal();
+    else hideReveal();
+  }
+
+  function presentPrev(){
+    if (present.idx <= 0) return;
+    present.idx -= 1;
+    loadPresentRun();
+  }
+
+  function presentNext(){
+    if (present.idx >= present.runs.length - 1) return;
+    present.idx += 1;
+    loadPresentRun();
+  }
+
+  els.presentBtn.addEventListener("click", function(){
+    enterPresentation(presentRunsForEntry());
+  });
+  els.presentPrev.addEventListener("click", presentPrev);
+  els.presentNext.addEventListener("click", presentNext);
+  els.presentRevealBtn.addEventListener("click", toggleReveal);
+  els.presentExit.addEventListener("click", exitPresentation);
+  els.presentReveal.addEventListener("click", hideReveal);
+
+  document.addEventListener("keydown", function(e){
+    // once the user clicks into the sandboxed game iframe, keyboard events go to the
+    // iframe, not this document, so these keys stop working — the on-screen buttons
+    // are the reliable controls; keys work again after clicking back into the top bar.
+    if (!present.active) return;
+    if (e.key === "Escape"){
+      if (!els.presentReveal.classList.contains("hidden")) hideReveal();
+      else exitPresentation();
+      return;
+    }
+    if (e.key === "ArrowLeft") presentPrev();
+    else if (e.key === "ArrowRight") presentNext();
+    else if (e.key === "r" || e.key === "R") toggleReveal();
   });
 
   function showEmpty(){
@@ -708,6 +947,11 @@
     }
     state.runs = runs;
     render();
+
+    var params = new URLSearchParams(window.location.search);
+    if (params.get("present") === "1"){
+      enterPresentation(presentRunsForEntry());
+    }
   }
 
   fetch("runs/index.json", { cache: "no-store" })
