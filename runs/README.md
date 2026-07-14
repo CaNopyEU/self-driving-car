@@ -39,14 +39,16 @@ dashboard at the repo root.
     "consoleErrors": 0,
     "notes": ""
   },
-  "review": {                            // filled in by hand after playing — see rubric
+  "review": {                            // filled in by hand after playing — see scoring
     "firstTry": null,                    // worked out of the box, no touch-ups (true/false)
-    "playability": null,
-    "creativity": null,
-    "visual": null,
-    "taskFit": null,
+    "checklist": {                       // efficiency era (T1 v2+, T2 v3+): one verdict per
+      "loads": null, "startScreen": null, "controls": null, "collision": null,
+      "score": null, "difficulty": null, "restart": null, "sandbox": null,
+      "lean": null, "honesty": null      // T2 additionally: "true3d"
+    },
     "notes": ""
-  },
+  },                                     // legacy runs (T1 v1 / T2 v2) instead carry
+                                         // playability/creativity/visual/taskFit 1–5
   "media": { "gif": null }               // optional "preview.gif" inside the run folder
 }
 ```
@@ -60,7 +62,30 @@ counts the context re-sent on every agent turn — it measures what the run cons
 not the conversation size. `costUsd: null` means the provider reported no cost
 (Copilot bills premium requests, not tokens); a genuine free run records `0`.
 
-## Rubric (manual review, 1–5)
+## Scoring (efficiency era — T1 v2+, T2 v3+)
+
+The review is the task's own checklist, verified item by item after actually
+playing (every item is binary and objective; the anchors are the requirement rows
+in `tasks/<task>.md` — the task file is the rubric):
+
+1. **Gate:** every checklist item must be `true`. Any `false` ⇒ the run is **DNF**
+   — it stays in the gallery, but is unranked. Cost cannot save a DNF.
+2. **Rank:** passing runs are ordered by `metrics.costUsd` ascending — cheapest
+   wins; exact ties break by `durationSeconds`. Rank a set of runs together only
+   if every one of them has a non-null `costUsd`; if any is `null`, rank the
+   whole set by total billed tokens (`input + output + reasoning`, null
+   reasoning counts as 0) instead and say so in `review.notes` — reasoning
+   tokens are the main cost driver for reasoning models and must count.
+
+A run aborted by harness/provider infrastructure (rate limit, network drop,
+tripwire false positive) before the model finished is **void, not a DNF** —
+discard it and re-run. Only failures the model itself produced count.
+
+`review.checklist` keys match the `Key` column of the task's checklist table.
+Verify `honesty` last: compare the model's RESULT.md self-assessment against your
+own verdicts — any overclaimed item fails it.
+
+## Legacy rubric (T1 v1 / T2 v2 runs — manual review, 1–5)
 
 Score after actually playing it. Fixed anchors so runs stay comparable months apart:
 

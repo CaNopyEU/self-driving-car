@@ -35,6 +35,16 @@ const TASKS: Record<string, string> = {
   T2: "tasks/T2-gameify-3d.md",
 };
 
+// Review skeleton keys — must match the `Key` column of the task's checklist table.
+const CHECKLIST_CORE = [
+  "loads", "startScreen", "controls", "collision", "score",
+  "difficulty", "restart", "sandbox", "lean", "honesty",
+];
+const CHECKLIST: Record<string, string[]> = {
+  T1: CHECKLIST_CORE,
+  T2: [...CHECKLIST_CORE, "true3d"],
+};
+
 const { values: args } = parseArgs({
   options: {
     task: { type: "string" },
@@ -321,7 +331,11 @@ ledger.push({
     consoleErrors: null,
     notes: hasEntryPoint ? "" : "no index.html entry point — Play link is dead",
   },
-  review: { firstTry: null, playability: null, creativity: null, visual: null, taskFit: null, notes: "" },
+  review: {
+    firstTry: null,
+    checklist: Object.fromEntries(CHECKLIST[task].map((key) => [key, null])),
+    notes: "",
+  },
   media: { gif: null },
 });
 writeFileSync(ledgerPath + ".tmp", JSON.stringify(ledger, null, 2) + "\n");

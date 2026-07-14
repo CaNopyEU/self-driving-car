@@ -1,52 +1,67 @@
-# Task T2 — Game-ify in 3D (v2)
+# Task T2 — Lean Arcade 3D (v3)
 
 You are given a small vanilla-JS canvas project: a self-driving-car neural-network
 demo (2D top-down road, sensor rays, generational learning). Your job is to turn it
-into a **complete, polished, playable arcade game in 3D** — something a person would
-genuinely enjoy playing for ten minutes.
+into a small but **complete, working arcade game in 3D** that passes every item of
+the checklist below — **for the lowest possible total run cost**.
 
-This is the same brief as the 2D version of this task, with one difference: the game
-must be **truly 3D** — a perspective camera on a 3D road with 3D vehicles (chase cam,
-cockpit, cinematic — your call, justify it). Not a 2D game with tilted graphics.
+## How you are scored
 
-## Requirements
+This is an **efficiency benchmark**. Ranking works in two steps:
 
-- **Player-controlled car** (keyboard). The game, not the simulation, is the product.
-- **Score system** — meaningful scoring the player understands at a glance.
-- **Progression** — levels, waves, or escalating difficulty; the game must ramp up.
-- **Full game loop** — start screen, playing state, game over, restart. No dead ends.
-- **Polish** — visual and game-feel polish is explicitly part of the task: lighting,
-  motion, camera work, feedback, HUD, sound if you can do it without external assets.
-  The point of 3D is spectacle; deliver some.
+1. **The checklist is an all-or-nothing gate.** A run that fails *any* item is
+   **DNF** — disqualified, no matter how cheap it was.
+2. **Among passing runs, total run cost decides** (harness-billed tokens, converted
+   to USD). Cheapest wins.
 
-## The neural network
+Nothing beyond the checklist earns anything. Extra features, extra polish, long
+prose — they don't score, they only cost you tokens.
 
-The existing neural network is **yours to decide about**: remove it entirely if it
-serves no purpose, or repurpose it (AI opponents, adaptive traffic, a rival racer…).
-Justify your choice in RESULT.md. Dead code left behind counts against you.
+## The game (fixed concept — build exactly this)
+
+An **endless highway dodger in 3D**: the player's car drives on a 3D road, dodges
+traffic, and survives as long as possible. Score grows with distance survived.
+
+## Checklist (all items mandatory)
+
+| # | Key | Requirement |
+|---|---|---|
+| 1 | `loads` | Served statically, `index.html` loads and renders with **zero uncaught errors and zero `console.error` output** — on load and through 60 seconds of play. Warnings/info don't count; errors you catch and handle must not be re-logged as errors. |
+| 2 | `startScreen` | A start screen shows the game name and the controls; the game starts on a key press or click. |
+| 3 | `controls` | The player car steers with the keyboard (arrow keys and/or WASD). |
+| 4 | `collision` | Multiple moving obstacles/traffic (roughly three or more on screen at a time) keep approaching the player, so surviving requires active, repeated steering — a single or permanently-avoidable obstacle fails. Hitting one ends the run. |
+| 5 | `score` | A numeric score is visible **during** play and increases with progress. |
+| 6 | `difficulty` | The game gets **visibly** harder **within the first 60 seconds** of a run — speed, traffic density, or spawn rate increases by an amount the reviewer clearly notices while playing. No sub-perceptible drift, no ramp that only starts after minutes. |
+| 7 | `restart` | Game over shows the final score; restart works **without a page reload** — die, restart, die, restart again, always returning to a playable state. No frozen screens, no dead ends. |
+| 8 | `sandbox` | The game runs inside a sandboxed iframe where `localStorage` / `sessionStorage` / cookies **throw**. Wrap storage in try/catch and degrade gracefully — the game must never crash because storage is unavailable. |
+| 9 | `lean` | No orphan files: every file left in the directory is reachable from `index.html` (via its script/link/img/fetch/import chain) — `RESULT.md` excepted. The neural-network demo is yours to decide about: remove it, or genuinely wire it in; unreferenced leftovers fail this item. |
+| 10 | `honesty` | `RESULT.md` exists, contains the checklist as a table with a per-item pass/fail verdict, and matches reality. A missing file, a missing table, or any item claimed pass that the reviewer judges failed — fails this item. |
+| 11 | `true3d` | **Truly 3D**: a perspective camera on a 3D road with 3D vehicles, and the camera follows the player's car. Not a 2D game with tilted graphics. |
 
 ## Constraints
 
 - **Zero build step.** The game must run by serving this directory statically and
   opening `index.html`. No bundlers, no npm install.
-- **Three.js via CDN is allowed** (a single `<script>`/importmap from a public CDN).
-  Everything else self-contained. Raw WebGL is also acceptable if you prefer.
-- The game will also be embedded in a **sandboxed iframe** where `localStorage` /
-  `sessionStorage` / cookies **throw**. Treat storage as best-effort: wrap access in
-  try/catch and degrade gracefully (e.g. high score just doesn't persist). The game
-  must never crash because storage is unavailable.
+- **Three.js is allowed**, but the published game must be self-contained and work
+  offline: download/vendor the exact library file(s) into the project directory
+  and reference the **local copy** (a pinned version, never `@latest`). A game
+  that only runs with live network access fails item 1. Raw WebGL is also
+  acceptable if you prefer. Everything else self-contained.
+- Your game is scored **inside a sandboxed iframe with no same-origin access**:
+  any `localStorage`/`sessionStorage`/cookie access **throws — reads included,
+  and including storage calls left in the base demo that run at page load**.
+  Opening the page directly (even via Playwright) will *not* reproduce this;
+  assume storage is unavailable everywhere.
 - This is a **single attempt**. There is no follow-up prompt and no human to ask.
-  Make decisions and commit to them. If you have browser tooling available, use it
-  to verify the game actually runs before you finish.
+- Verification is your call: browser tooling may be available. Verifying costs
+  tokens; skipping it risks a DNF. Choose your insurance level.
 
 ## Deliverable
 
-Besides the working game, write **`RESULT.md`** in the project root:
+Besides the working game, write **`RESULT.md`** in the project root — **short**:
 
-1. **What I built** — one-paragraph pitch of the game.
-2. **Features** — bullet list of everything added/changed.
-3. **How to play** — controls and goal.
-4. **Camera & 3D approach** — what you chose and why.
-5. **The neural network** — what you did with it and why.
-6. **Design decisions** — the interesting trade-offs you made.
-7. **Next** — what you would build with one more attempt.
+1. One or two sentences on what you built (max ~120 words total prose).
+2. The checklist above as a table with your per-item self-assessment
+   (pass/fail + one short note each).
+
+Long essays cost tokens and earn nothing.
