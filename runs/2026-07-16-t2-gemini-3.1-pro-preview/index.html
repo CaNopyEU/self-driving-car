@@ -1,0 +1,459 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Highway Dodger</title>
+    <style>
+        body { margin: 0; overflow: hidden; background-color: #87CEEB; font-family: sans-serif; }
+        canvas { display: block; }
+        #ui { position: absolute; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; }
+        .screen { display: none; position: absolute; top: 0; left: 0; width: 100%; height: 100%; flex-direction: column; justify-content: center; align-items: center; background: rgba(0,0,0,0.7); color: white; }
+        .active { display: flex; }
+        h1 { font-size: 3rem; margin-bottom: 1rem; }
+        p { font-size: 1.5rem; margin-bottom: 2rem; }
+        #hud { position: absolute; top: 10px; left: 10px; color: white; font-size: 1.5rem; font-weight: bold; text-shadow: 1px 1px 2px black; }
+    </style>
+</head>
+<body>
+    <script src="three.min.js"></script>
+    <div id="ui">
+        <div id="start-screen" class="screen active">
+            <h1>3D Highway Dodger</h1>
+            <p>Controls: Arrow keys / WASD to steer</p>
+            <p>Click or press any key to start</p>
+        </div>
+        <div id="hud" style="display: none;">Score: <span id="score-val">0</span></div>
+        <div id="game-over-screen" class="screen">
+            <h1>Game Over</h1>
+            <p>Final Score: <span id="final-score">0</span></p>
+            <p>Click or press any key to restart</p>
+        </div>
+    </div>
+    <script>
+        // Sandbox safety
+        try {
+            localStorage.getItem('test');
+        } catch(e) {
+            console.warn('Storage access denied, degrading gracefully.');
+        }
+
+        // Audio setup
+        let audioCtx;
+        function initAudio() {
+            if (!audioCtx) {
+                try {
+                    audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+                } catch(e) {
+                    console.warn("Audio Context failed");
+                }
+            }
+            if (audioCtx && audioCtx.state === 'suspended') {
+                audioCtx.resume();
+            }
+        }
+
+        function playSound(type) {
+            if (!audioCtx) return;
+            const now = audioCtx.currentTime;
+            const osc = audioCtx.createOscillator();
+            const gain = audioCtx.createGain();
+            osc.connect(gain);
+            gain.connect(audioCtx.destination);
+
+            if (type === 'crash') {
+                osc.type = 'sawtooth';
+                osc.frequency.setValueAtTime(100, now);
+                osc.frequency.exponentialRampToValueAtTime(10, now + 0.5);
+                gain.gain.setValueAtTime(0.5, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.5);
+                osc.start(now);
+                osc.stop(now + 0.5);
+            } else if (type === 'score') {
+                osc.type = 'sine';
+                osc.frequency.setValueAtTime(400, now);
+                osc.frequency.exponentialRampToValueAtTime(600, now + 0.1);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.1);
+                osc.start(now);
+                osc.stop(now + 0.1);
+            } else if (type === 'powerup') {
+                osc.type = 'square';
+                osc.frequency.setValueAtTime(300, now);
+                osc.frequency.linearRampToValueAtTime(800, now + 0.3);
+                gain.gain.setValueAtTime(0.1, now);
+                gain.gain.exponentialRampToValueAtTime(0.01, now + 0.3);
+                osc.start(now);
+                osc.stop(now + 0.3);
+            }
+        }
+
+        // Engine sound loop
+        let engineOsc, engineGain;
+        function startEngineSound() {
+            if (!audioCtx) return;
+            if (engineOsc) return;
+            engineOsc = audioCtx.createOscillator();
+            engineGain = audioCtx.createGain();
+            engineOsc.type = 'triangle';
+            engineOsc.frequency.value = 50;
+            engineGain.gain.value = 0.05;
+            engineOsc.connect(engineGain);
+            engineGain.connect(audioCtx.destination);
+            engineOsc.start();
+        }
+        function stopEngineSound() {
+            if (engineOsc) {
+                engineOsc.stop();
+                engineOsc.disconnect();
+                engineGain.disconnect();
+                engineOsc = null;
+                engineGain = null;
+            }
+        }
+        function updateEngineSound(speedRatio) {
+            if (engineOsc) {
+                engineOsc.frequency.value = 50 + speedRatio * 50;
+            }
+        }
+
+        // Three.js setup
+        const scene = new THREE.Scene();
+        scene.background = new THREE.Color(0x87CEEB);
+        scene.fog = new THREE.Fog(0x87CEEB, 20, 100);
+
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        const renderer = new THREE.WebGLRenderer({ antialias: true });
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.body.appendChild(renderer.domElement);
+
+        // Lighting
+        const ambientLight = new THREE.AmbientLight(0xffffff, 0.6);
+        scene.add(ambientLight);
+        const dirLight = new THREE.DirectionalLight(0xffffff, 0.6);
+        dirLight.position.set(10, 20, 0);
+        scene.add(dirLight);
+
+        // Game objects
+        let player, ground, roadLines = [];
+        let obstacles = [];
+        let powerups = [];
+        let particles = [];
+
+        // Geometries & Materials
+        const playerGeo = new THREE.BoxGeometry(1.5, 0.8, 3);
+        const playerMat = new THREE.MeshLambertMaterial({ color: 0x0000ff });
+        const playerInvMat = new THREE.MeshLambertMaterial({ color: 0xffff00, emissive: 0x555500 });
+        
+        const obsGeo = new THREE.BoxGeometry(1.5, 1, 3);
+        const obsMat = new THREE.MeshLambertMaterial({ color: 0xff0000 });
+
+        const powerupGeo = new THREE.BoxGeometry(1, 1, 1);
+        const powerupMat = new THREE.MeshLambertMaterial({ color: 0xffff00 });
+
+        const particleGeo = new THREE.BoxGeometry(0.2, 0.2, 0.2);
+        const particleMat = new THREE.MeshBasicMaterial({ color: 0xffaa00 });
+
+        function createScene() {
+            // Player
+            player = new THREE.Mesh(playerGeo, playerMat);
+            player.position.set(0, 0.4, 0);
+            scene.add(player);
+
+            // Ground
+            const groundGeo = new THREE.PlaneGeometry(200, 2000);
+            const groundMat = new THREE.MeshLambertMaterial({ color: 0x228B22 });
+            ground = new THREE.Mesh(groundGeo, groundMat);
+            ground.rotation.x = -Math.PI / 2;
+            ground.position.z = -500;
+            scene.add(ground);
+
+            // Road
+            const roadGeo = new THREE.PlaneGeometry(12, 2000);
+            const roadMat = new THREE.MeshLambertMaterial({ color: 0x333333 });
+            const road = new THREE.Mesh(roadGeo, roadMat);
+            road.rotation.x = -Math.PI / 2;
+            road.position.y = 0.01;
+            road.position.z = -500;
+            scene.add(road);
+
+            // Center line
+            for (let i = 0; i < 50; i++) {
+                const lineGeo = new THREE.PlaneGeometry(0.2, 4);
+                const lineMat = new THREE.MeshBasicMaterial({ color: 0xffffff });
+                const line = new THREE.Mesh(lineGeo, lineMat);
+                line.rotation.x = -Math.PI / 2;
+                line.position.y = 0.02;
+                line.position.z = -i * 8;
+                scene.add(line);
+                roadLines.push(line);
+            }
+        }
+        createScene();
+
+        // Game State
+        let state = 'start'; // start, playing, gameover
+        let score = 0;
+        let baseSpeed = 20;
+        let speed = baseSpeed;
+        let difficulty = 1;
+        let playTime = 0;
+        let invincible = false;
+        let invincibleTimer = 0;
+        let shakeTime = 0;
+        let lastScoreTime = 0;
+
+        // Controls
+        const keys = { ArrowLeft: false, ArrowRight: false, a: false, d: false, ArrowUp: false, ArrowDown: false, w: false, s: false };
+        window.addEventListener('keydown', (e) => {
+            if (keys.hasOwnProperty(e.key)) keys[e.key] = true;
+            if (e.key === 'a' || e.key === 'd' || e.key === 'w' || e.key === 's') keys[e.key] = true;
+            
+            if (state === 'start' || state === 'gameover') {
+                startGame();
+            }
+        });
+        window.addEventListener('keyup', (e) => {
+            if (keys.hasOwnProperty(e.key)) keys[e.key] = false;
+            if (e.key === 'a' || e.key === 'd' || e.key === 'w' || e.key === 's') keys[e.key] = false;
+        });
+        window.addEventListener('mousedown', () => {
+            if (state === 'start' || state === 'gameover') {
+                startGame();
+            }
+        });
+
+        function resetGame() {
+            score = 0;
+            speed = baseSpeed;
+            difficulty = 1;
+            playTime = 0;
+            invincible = false;
+            invincibleTimer = 0;
+            player.position.set(0, 0.4, 0);
+            player.material = playerMat;
+            
+            obstacles.forEach(o => scene.remove(o));
+            obstacles = [];
+            powerups.forEach(p => scene.remove(p));
+            powerups = [];
+            particles.forEach(p => scene.remove(p.mesh));
+            particles = [];
+
+            document.getElementById('score-val').innerText = score;
+        }
+
+        function startGame() {
+            initAudio();
+            if (state !== 'playing') {
+                resetGame();
+                state = 'playing';
+                document.getElementById('start-screen').classList.remove('active');
+                document.getElementById('game-over-screen').classList.remove('active');
+                document.getElementById('hud').style.display = 'block';
+                startEngineSound();
+            }
+        }
+
+        function gameOver() {
+            state = 'gameover';
+            playSound('crash');
+            stopEngineSound();
+            document.getElementById('game-over-screen').classList.add('active');
+            document.getElementById('hud').style.display = 'none';
+            document.getElementById('final-score').innerText = Math.floor(score);
+            shakeTime = 0.5;
+            createExplosion(player.position);
+        }
+
+        function spawnObstacle(zPos) {
+            const obs = new THREE.Mesh(obsGeo, obsMat);
+            // Lanes: -4, 0, 4
+            const lane = (Math.floor(Math.random() * 3) - 1) * 4;
+            obs.position.set(lane, 0.5, zPos);
+            scene.add(obs);
+            obstacles.push(obs);
+        }
+
+        function spawnPowerup(zPos) {
+            const p = new THREE.Mesh(powerupGeo, powerupMat);
+            const lane = (Math.floor(Math.random() * 3) - 1) * 4;
+            p.position.set(lane, 0.5, zPos);
+            scene.add(p);
+            powerups.push(p);
+        }
+
+        function createExplosion(pos) {
+            for (let i = 0; i < 20; i++) {
+                const p = new THREE.Mesh(particleGeo, particleMat);
+                p.position.copy(pos);
+                scene.add(p);
+                particles.push({
+                    mesh: p,
+                    vx: (Math.random() - 0.5) * 10,
+                    vy: Math.random() * 10,
+                    vz: (Math.random() - 0.5) * 10,
+                    life: 1.0
+                });
+            }
+        }
+
+        let clock = new THREE.Clock();
+        let spawnTimer = 0;
+
+        function animate() {
+            requestAnimationFrame(animate);
+            const dt = clock.getDelta();
+
+            if (state === 'playing') {
+                playTime += dt;
+                
+                // Difficulty increase over first 60 seconds
+                difficulty = 1 + Math.min(playTime / 60, 1) * 1.5; 
+                speed = baseSpeed * difficulty;
+                updateEngineSound((speed - baseSpeed) / (baseSpeed * 1.5));
+
+                // Movement
+                const moveSpeed = 15;
+                if (keys.ArrowLeft || keys.a) player.position.x -= moveSpeed * dt;
+                if (keys.ArrowRight || keys.d) player.position.x += moveSpeed * dt;
+                
+                // Clamp player to road
+                player.position.x = Math.max(-5, Math.min(5, player.position.x));
+
+                player.position.z -= speed * dt;
+
+                // Move road elements to follow player roughly
+                ground.position.z = player.position.z - 500;
+                
+                roadLines.forEach(line => {
+                    if (line.position.z > player.position.z + 10) {
+                        line.position.z -= 400; // recycle lines
+                    }
+                });
+
+                // Spawning
+                spawnTimer -= dt;
+                // Base spawn rate decreases as difficulty increases to spawn more often
+                const currentSpawnRate = 1.0 / difficulty; 
+                if (spawnTimer <= 0) {
+                    spawnObstacle(player.position.z - 100);
+                    if (Math.random() < 0.1) { // 10% chance for powerup instead/also
+                        spawnPowerup(player.position.z - 100 + (Math.random()*20-10));
+                    }
+                    spawnTimer = currentSpawnRate + Math.random() * currentSpawnRate;
+                }
+
+                // Update obstacles
+                const playerBox = new THREE.Box3().setFromObject(player);
+                // Shrink hitbox slightly to be forgiving
+                playerBox.expandByScalar(-0.2); 
+
+                for (let i = obstacles.length - 1; i >= 0; i--) {
+                    let obs = obstacles[i];
+                    // Obstacles could move slower or faster, let's just leave them static relative to ground 
+                    // or move them towards player slightly
+                    obs.position.z -= (speed * 0.2) * dt; 
+
+                    if (obs.position.z > player.position.z + 10) {
+                        scene.remove(obs);
+                        obstacles.splice(i, 1);
+                        continue;
+                    }
+
+                    const obsBox = new THREE.Box3().setFromObject(obs);
+                    if (playerBox.intersectsBox(obsBox)) {
+                        if (invincible) {
+                            scene.remove(obs);
+                            obstacles.splice(i, 1);
+                            createExplosion(obs.position);
+                            playSound('crash');
+                        } else {
+                            gameOver();
+                        }
+                    }
+                }
+
+                // Update powerups
+                powerups.forEach(p => {
+                    p.rotation.x += dt * 2;
+                    p.rotation.y += dt * 2;
+                });
+
+                for (let i = powerups.length - 1; i >= 0; i--) {
+                    let p = powerups[i];
+                    if (p.position.z > player.position.z + 10) {
+                        scene.remove(p);
+                        powerups.splice(i, 1);
+                        continue;
+                    }
+
+                    const pBox = new THREE.Box3().setFromObject(p);
+                    if (playerBox.intersectsBox(pBox)) {
+                        scene.remove(p);
+                        powerups.splice(i, 1);
+                        invincible = true;
+                        invincibleTimer = 5.0; // 5 seconds of shield
+                        player.material = playerInvMat;
+                        playSound('powerup');
+                    }
+                }
+
+                // Powerup logic
+                if (invincible) {
+                    invincibleTimer -= dt;
+                    if (invincibleTimer <= 0) {
+                        invincible = false;
+                        player.material = playerMat;
+                    }
+                }
+
+                // Score
+                score += speed * dt * 0.1;
+                document.getElementById('score-val').innerText = Math.floor(score);
+                if (score - lastScoreTime > 100) {
+                    playSound('score');
+                    lastScoreTime = score;
+                }
+
+                // Camera follow
+                camera.position.x = player.position.x * 0.3; // slight pan
+                camera.position.y = 5;
+                camera.position.z = player.position.z + 10;
+                camera.lookAt(player.position.x * 0.5, 0, player.position.z - 20);
+            }
+
+            // Particles
+            for (let i = particles.length - 1; i >= 0; i--) {
+                let p = particles[i];
+                p.mesh.position.x += p.vx * dt;
+                p.mesh.position.y += p.vy * dt;
+                p.mesh.position.z += p.vz * dt;
+                p.vy -= 20 * dt; // gravity
+                p.life -= dt;
+                if (p.life <= 0) {
+                    scene.remove(p.mesh);
+                    particles.splice(i, 1);
+                }
+            }
+
+            // Camera Shake
+            if (shakeTime > 0) {
+                shakeTime -= dt;
+                camera.position.x += (Math.random() - 0.5) * 0.5;
+                camera.position.y += (Math.random() - 0.5) * 0.5;
+            }
+
+            renderer.render(scene, camera);
+        }
+
+        window.addEventListener('resize', () => {
+            camera.aspect = window.innerWidth / window.innerHeight;
+            camera.updateProjectionMatrix();
+            renderer.setSize(window.innerWidth, window.innerHeight);
+        });
+
+        animate();
+    </script>
+</body>
+</html>

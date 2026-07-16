@@ -222,6 +222,37 @@
   .empty-state p{ margin:4px 0; font-size:14px; }
   .empty-state code{ background:var(--t1-bg); padding:1px 6px; border-radius:4px; font-size:13px; }
 
+  /* cost leaderboard + checklist matrix (gallery) */
+  .summary-section{ margin:36px 0; }
+  .summary-section h2{ font-size:18px; font-weight:700; margin:0 0 14px; }
+  .leaderboard-cols{ display:grid; grid-template-columns:repeat(auto-fit, minmax(320px, 1fr)); gap:20px; }
+  .leaderboard-col{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; box-shadow:var(--shadow); }
+  .leaderboard-col h3{ margin:0 0 12px; font-size:14px; font-weight:700; display:flex; align-items:center; gap:8px; }
+  .leaderboard-list{ list-style:none; margin:0; padding:0; display:flex; flex-direction:column; gap:4px; }
+  .leaderboard-row{ display:flex; align-items:center; gap:10px; padding:7px 6px; border-radius:8px; font-size:13px; }
+  .leaderboard-row.dnf{ opacity:0.55; }
+  .leaderboard-row.unreviewed{ color:var(--ink-muted); }
+  .leaderboard-rank{ width:20px; text-align:right; color:var(--ink-muted); font-variant-numeric:tabular-nums; font-weight:700; }
+  .leaderboard-model{ flex:1; font-weight:600; color:var(--ink); white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .leaderboard-price{ font-variant-numeric:tabular-nums; white-space:nowrap; color:var(--ink2); }
+  .badge-free{ display:inline-flex; align-items:center; font-size:11px; font-weight:700; letter-spacing:0.02em; padding:2px 8px; border-radius:999px; background:var(--good-bg); color:var(--good); }
+  .list-price-note{ font-size:11px; color:var(--ink-muted); margin-left:6px; }
+  .leaderboard-footnote{ font-size:11.5px; color:var(--ink-muted); margin-top:12px; font-style:italic; }
+  .leaderboard-empty{ color:var(--ink-muted); font-size:13px; padding:6px; font-style:italic; }
+
+  .matrix-cols{ display:flex; flex-direction:column; gap:20px; }
+  .matrix-box{ background:var(--surface); border:1px solid var(--border); border-radius:12px; padding:16px; box-shadow:var(--shadow); }
+  .matrix-box h3{ margin:0 0 12px; font-size:14px; font-weight:700; }
+  .matrix-scroll{ overflow-x:auto; border:1px solid var(--border); border-radius:8px; }
+  table.matrix-table{ border-collapse:collapse; font-size:12.5px; min-width:100%; }
+  table.matrix-table th, table.matrix-table td{ padding:7px 11px; text-align:center; border-bottom:1px solid var(--grid); white-space:nowrap; }
+  table.matrix-table thead th{ color:var(--ink-muted); font-weight:600; text-transform:uppercase; font-size:10.5px; letter-spacing:0.03em; border-bottom:1px solid var(--border); }
+  table.matrix-table tbody th{ text-align:left; font-weight:600; color:var(--ink); }
+  table.matrix-table tbody tr:last-child td, table.matrix-table tbody tr:last-child th{ border-bottom:none; }
+  table.matrix-table .cell-pass{ color:var(--good); font-weight:700; }
+  table.matrix-table .cell-fail{ color:var(--critical); font-weight:700; }
+  table.matrix-table .cell-null{ color:var(--ink-muted); }
+
   footer.page-footer{
     margin-top:48px; padding-top:20px; border-top:1px solid var(--border);
     color:var(--ink-muted); font-size:12.5px; text-align:center;
@@ -296,8 +327,10 @@
   }
   #present-reveal.hidden{ display:none !important; }
   .present-reveal-card{ text-align:center; color:#fff; padding:24px; max-width:720px; }
-  .present-reveal-name{ font-size:clamp(32px, 6vw, 64px); font-weight:800; margin:0 0 6px; }
-  .present-reveal-full{ font-size:14px; color:#c3c2b7; margin:0 0 24px; }
+  .present-reveal-price{ font-size:clamp(36px, 7vw, 72px); font-weight:800; margin:0 0 8px; }
+  .present-reveal-price.free{ color:#4ade80; }
+  .present-reveal-listprice{ font-size:14px; color:#c3c2b7; margin:0 0 16px; }
+  .present-reveal-status{ margin:0 0 16px; }
   .present-stat-tiles{
     display:flex; flex-wrap:wrap; justify-content:center; gap:24px;
     padding:16px 0; border-top:1px solid rgba(255,255,255,0.14); border-bottom:1px solid rgba(255,255,255,0.14);
@@ -305,11 +338,87 @@
   .present-stat-tile{ display:flex; flex-direction:column; gap:4px; min-width:90px; }
   .present-stat-tile .stat-label{ font-size:12px; color:#c3c2b7; text-transform:uppercase; letter-spacing:0.04em; }
   .present-stat-tile .stat-value{ font-size:28px; font-weight:700; color:#fff; }
-  #present-reveal .review-row{ justify-content:center; font-size:13px; color:#c3c2b7; margin-top:16px; }
-  #present-reveal .review-row .score{ color:#c3c2b7; }
-  #present-reveal .review-row .score-label{ color:#c3c2b7; border-bottom-color:#c3c2b7; }
-  #present-reveal .review-row .score-val{ color:#fff; }
+  .present-reveal-note{ margin-top:14px; font-size:12px; color:#c3c2b7; font-style:italic; }
   .present-footer{ margin-top:20px; font-size:12px; color:#c3c2b7; font-style:italic; }
+
+  /* status chips / task badges read fine on the always-dark presentation stage
+     regardless of the viewer's light/dark system theme */
+  #present-reveal .status-chip.good, #present-ladder .status-chip.good{ background:rgba(74,222,128,0.18); color:#4ade80; }
+  #present-reveal .status-chip.critical, #present-ladder .status-chip.critical{ background:rgba(248,113,113,0.18); color:#f87171; }
+  #present-reveal .status-chip.muted, #present-ladder .status-chip.muted{ background:transparent; color:#c3c2b7; border:1px solid rgba(255,255,255,0.25); }
+  #present-ladder .badge-t1, #present-ladder .badge-t2, #present-ladder .badge-t3{ background:rgba(255,255,255,0.14); color:#fff; }
+
+  /* live ladder: side panel over the presentation stage */
+  #present-ladder{
+    position:absolute; top:16px; right:16px; width:300px; max-height:calc(100% - 32px);
+    background:rgba(18,18,18,0.94); border:1px solid rgba(255,255,255,0.16); border-radius:12px;
+    color:#fff; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 8px 28px rgba(0,0,0,0.55); z-index:10;
+  }
+  #present-ladder.hidden{ display:none !important; }
+  .present-ladder-head{
+    display:flex; align-items:center; justify-content:space-between;
+    padding:10px 14px; border-bottom:1px solid rgba(255,255,255,0.16);
+    font-size:13px; font-weight:700; letter-spacing:0.01em;
+  }
+  .present-ladder-head button{ border:none; background:transparent; color:#c3c2b7; cursor:pointer; font-size:15px; padding:2px 4px; }
+  .present-ladder-head button:hover{ color:#fff; }
+  .present-ladder-list{ list-style:none; margin:0; padding:6px; overflow-y:auto; display:flex; flex-direction:column; gap:4px; }
+  .present-ladder-row{ display:flex; align-items:center; gap:8px; padding:6px 8px; border-radius:8px; font-size:12.5px; transition:background .2s ease; }
+  .present-ladder-row.dnf{ opacity:0.5; }
+  .present-ladder-row.highlight{ background:rgba(57,135,229,0.28); animation:ladder-pop .6s ease; }
+  @keyframes ladder-pop{ from{ background:rgba(57,135,229,0.55); } to{ background:rgba(57,135,229,0.28); } }
+  .present-ladder-rank{ width:18px; text-align:right; color:#c3c2b7; font-variant-numeric:tabular-nums; }
+  .present-ladder-model{ flex:1; font-weight:600; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+  .present-ladder-price{ font-variant-numeric:tabular-nums; white-space:nowrap; }
+  .present-ladder-empty{ padding:18px 14px; color:#c3c2b7; font-size:12.5px; text-align:center; list-style:none; }
+
+  /* scoring UI — exists only when the local bench server answers /api/ping */
+  .score-content{ display:flex; flex-direction:column; gap:1px; font-size:12.5px; }
+  .score-section{ margin:10px 0 3px; font-size:10.5px; font-weight:700; letter-spacing:0.05em; text-transform:uppercase; color:var(--ink-muted); }
+  .score-content .score-section:first-child{ margin-top:2px; }
+  .score-row{
+    display:flex; align-items:center; justify-content:space-between; gap:10px;
+    padding:4px 8px; border-radius:6px; border:none; background:transparent;
+    font-family:inherit; font-size:inherit; text-align:left; cursor:pointer; color:inherit;
+  }
+  .score-row:hover{ background:var(--t1-bg); }
+  .score-row .score-key{ color:var(--ink2); }
+  .score-row .score-val{ font-weight:700; min-width:28px; text-align:right; }
+  .score-val.val-pass{ color:var(--good); }
+  .score-val.val-fail{ color:var(--critical); }
+  .score-val.val-null{ color:var(--ink-muted); font-weight:400; }
+  .score-notes{
+    width:100%; margin:3px 0 2px; padding:6px 8px; border-radius:6px;
+    border:1px solid var(--border); background:transparent; color:var(--ink);
+    font-family:inherit; font-size:12px;
+  }
+  .score-notes::placeholder{ color:var(--ink-muted); }
+  .score-save-status{ min-height:16px; margin-top:8px; font-size:11px; color:var(--ink-muted); text-align:right; }
+  .score-save-status.ok{ color:var(--good); }
+  .score-save-status.err{ color:var(--critical); }
+  .score-modal{ width:min(460px, 100%); height:auto; max-height:min(760px, 90vh); }
+  .score-modal-body{ overflow-y:auto; padding:12px 16px; }
+
+  /* dark variant on the presentation stage, mirroring the ladder panel */
+  #present-score{
+    position:absolute; top:16px; left:16px; width:300px; max-height:calc(100% - 32px);
+    background:rgba(18,18,18,0.94); border:1px solid rgba(255,255,255,0.16); border-radius:12px;
+    color:#fff; display:flex; flex-direction:column; overflow:hidden;
+    box-shadow:0 8px 28px rgba(0,0,0,0.55); z-index:10;
+  }
+  #present-score.hidden{ display:none !important; }
+  .present-score-body{ overflow-y:auto; padding:8px 10px 12px; }
+  #present-score .score-row:hover{ background:rgba(255,255,255,0.08); }
+  #present-score .score-row .score-key{ color:#e8e7e0; }
+  #present-score .score-section{ color:#c3c2b7; }
+  #present-score .score-val.val-pass{ color:#4ade80; }
+  #present-score .score-val.val-fail{ color:#f87171; }
+  #present-score .score-val.val-null{ color:#c3c2b7; }
+  #present-score .score-notes{ border-color:rgba(255,255,255,0.2); color:#fff; }
+  #present-score .score-save-status{ color:#c3c2b7; }
+  #present-score .score-save-status.ok{ color:#4ade80; }
+  #present-score .score-save-status.err{ color:#f87171; }
 </style>
 </head>
 <body>
@@ -366,13 +475,11 @@
           <th scope="col">Model</th>
           <th scope="col">Harness</th>
           <th scope="col">Tokens</th>
+          <th scope="col">Cache</th>
           <th scope="col">Duration</th>
           <th scope="col">Cost</th>
           <th scope="col">Diff</th>
-          <th scope="col">Playability</th>
-          <th scope="col">Creativity</th>
-          <th scope="col">Visual</th>
-          <th scope="col">Task fit</th>
+          <th scope="col">Status</th>
           <th scope="col">First try</th>
           <th scope="col">Smoke</th>
           <th scope="col">Play</th>
@@ -382,6 +489,16 @@
       <tbody id="table-body"></tbody>
     </table>
   </div>
+
+  <section id="leaderboard-section" class="summary-section">
+    <h2>Cost leaderboard</h2>
+    <div id="leaderboard-cols" class="leaderboard-cols"></div>
+  </section>
+
+  <section id="matrix-section" class="summary-section">
+    <h2>Checklist matrix</h2>
+    <div id="matrix-cols" class="matrix-cols"></div>
+  </section>
 
   <footer class="page-footer">
     Frozen base: base-v1 · metrics are harness-reported, scores are human-reviewed
@@ -404,22 +521,48 @@
   </div>
 </div>
 
+<div class="modal-overlay hidden" id="score-overlay">
+  <div class="modal score-modal" role="dialog" aria-modal="true" aria-labelledby="score-title">
+    <div class="modal-header">
+      <div class="modal-title" id="score-title"></div>
+      <button type="button" class="modal-close" id="score-close" aria-label="Close">✕</button>
+    </div>
+    <div class="score-modal-body" id="score-body"></div>
+  </div>
+</div>
+
 <div id="present-overlay" class="hidden">
   <div class="present-top">
     <div class="present-left">
       <span id="present-label"></span>
     </div>
     <div class="present-right">
-      <span class="present-hint">←/→ games · R reveal · Esc exit</span>
+      <span class="present-hint">←/→ games · R reveal · L ladder · Esc exit</span>
       <button type="button" id="present-prev" class="present-btn2">← Prev</button>
       <button type="button" id="present-reveal-btn" class="present-btn2 reveal">👁 Reveal</button>
       <button type="button" id="present-next" class="present-btn2">Next →</button>
+      <button type="button" id="present-score-btn" class="present-btn2 hidden">✎ Score</button>
+      <button type="button" id="present-ladder-btn" class="present-btn2">🏆 Ladder</button>
       <button type="button" id="present-exit" class="present-btn2" aria-label="Exit presentation">✕</button>
     </div>
   </div>
   <div class="present-stage">
-    <iframe id="present-iframe" title="Mystery game" src="about:blank" sandbox="allow-scripts allow-pointer-lock"></iframe>
+    <iframe id="present-iframe" title="Game replay" src="about:blank" sandbox="allow-scripts allow-pointer-lock"></iframe>
     <div id="present-reveal" class="hidden"></div>
+    <div id="present-ladder" class="hidden">
+      <div class="present-ladder-head">
+        <span>Live ladder</span>
+        <button type="button" id="present-ladder-close" aria-label="Close ladder">✕</button>
+      </div>
+      <ol id="present-ladder-list" class="present-ladder-list"></ol>
+    </div>
+    <div id="present-score" class="hidden">
+      <div class="present-ladder-head">
+        <span>Score this run</span>
+        <button type="button" id="present-score-close" aria-label="Close score panel">✕</button>
+      </div>
+      <div id="present-score-body" class="present-score-body"></div>
+    </div>
   </div>
 </div>
 
@@ -472,6 +615,21 @@
     return String(total);
   }
 
+  function fmtK(n){
+    if (n < 1000) return String(n);
+    if (n < 10000) return (n / 1000).toFixed(1) + "k";
+    return Math.round(n / 1000) + "k";
+  }
+
+  // prompt-cache traffic, e.g. "130k r / 26k w" — the in/out stat excludes it
+  function fmtCache(tokens){
+    tokens = tokens || {};
+    var parts = [];
+    if (tokens.cacheRead !== null && tokens.cacheRead !== undefined) parts.push(fmtK(tokens.cacheRead) + " r");
+    if (tokens.cacheWrite !== null && tokens.cacheWrite !== undefined) parts.push(fmtK(tokens.cacheWrite) + " w");
+    return parts.length ? parts.join(" / ") : "–";
+  }
+
   function fmtDuration(sec){
     if (sec === null || sec === undefined) return "—";
     sec = Math.round(sec);
@@ -486,6 +644,56 @@
   function fmtCost(cost){
     if (cost === null || cost === undefined) return "—";
     return "$" + cost.toFixed(2);
+  }
+
+  // sub-dime prices keep a third decimal so cheap runs don't all collapse to "$0.02"
+  function fmtUsd(cost){
+    if (cost === null || cost === undefined) return "—";
+    if (cost >= 0.1) return "$" + cost.toFixed(2);
+    return "$" + cost.toFixed(3).replace(/0$/, "");
+  }
+
+  // Checklist keys per task, in task-file order (T1 v4 / T2 v5; T2 additionally
+  // has true3d). The ledger only ever holds current-version runs — on a task
+  // change it is wiped and re-run.
+  var CHECKLIST_KEYS = {
+    T1: ["loads", "startScreen", "controls", "collision", "score", "difficulty", "restart", "sandbox", "lean", "juice", "powerup", "honesty"],
+    T2: ["loads", "startScreen", "controls", "collision", "score", "difficulty", "restart", "sandbox", "lean", "juice", "powerup", "honesty", "true3d"]
+  };
+
+  // PASS = every checklist item true, DNF = any item false, UNREVIEWED = any item still null.
+  // Derived only from the keys actually present in the run's checklist, so a
+  // ledger entry with a variant key set never gets penalized for absent keys.
+  function checklistStatus(review){
+    var checklist = (review && review.checklist) || {};
+    var keys = Object.keys(checklist);
+    if (keys.length === 0) return "unreviewed";
+    var hasFalse = keys.some(function(k){ return checklist[k] === false; });
+    if (hasFalse) return "dnf";
+    var hasNull = keys.some(function(k){ return checklist[k] === null || checklist[k] === undefined; });
+    if (hasNull) return "unreviewed";
+    return "pass";
+  }
+
+  function checklistStatusChip(review){
+    var status = checklistStatus(review);
+    if (status === "pass") return h("span", { className: "status-chip good", text: "✓ PASS" });
+    if (status === "dnf") return h("span", { className: "status-chip critical", text: "✗ DNF" });
+    return h("span", { className: "status-chip muted", text: "not scored yet" });
+  }
+
+  // Free runs with an optional costUsdList rank/slot by that list-price equivalent.
+  function effectiveCost(run){
+    var m = run.metrics || {};
+    if (m.costUsd === 0 && typeof m.costUsdList === "number") return m.costUsdList;
+    return m.costUsd;
+  }
+
+  function byCostAsc(a, b){
+    var ca = effectiveCost(a), cb = effectiveCost(b);
+    if (ca === null || ca === undefined) ca = Infinity;
+    if (cb === null || cb === undefined) cb = Infinity;
+    return ca - cb;
   }
 
   function fmtDiff(diff){
@@ -514,8 +722,12 @@
       return h("span", { className: "status-chip muted", text: "not yet smoke-tested" });
     }
     if (smoke.loads === true){
-      var errs = smoke.consoleErrors || 0;
-      return h("span", { className: "status-chip good", text: "✓ loads, " + errs + " error" + (errs === 1 ? "" : "s") });
+      // consoleErrors is a count in older entries, a boolean when set via the scoring UI
+      var errs = smoke.consoleErrors;
+      var errText = errs === true ? "console errors"
+                  : (typeof errs === "number" && errs > 0) ? errs + " error" + (errs === 1 ? "" : "s")
+                  : "0 errors";
+      return h("span", { className: "status-chip good", text: "✓ loads, " + errText });
     }
     return h("span", { className: "status-chip critical", text: "✗ did not load" });
   }
@@ -533,7 +745,8 @@
     view: "cards"
   };
 
-  var present = { active: false, runs: [], idx: 0 };
+  var present = { active: false, runs: [], idx: 0, revealed: {}, lastRevealedId: null };
+  var ladderAutoHideTimer = null;
 
   var els = {
     grid: document.getElementById("grid"),
@@ -556,7 +769,24 @@
     presentPrev: document.getElementById("present-prev"),
     presentNext: document.getElementById("present-next"),
     presentRevealBtn: document.getElementById("present-reveal-btn"),
-    presentExit: document.getElementById("present-exit")
+    presentExit: document.getElementById("present-exit"),
+    presentLadder: document.getElementById("present-ladder"),
+    presentLadderList: document.getElementById("present-ladder-list"),
+    presentLadderBtn: document.getElementById("present-ladder-btn"),
+    presentLadderClose: document.getElementById("present-ladder-close"),
+    presentScoreBtn: document.getElementById("present-score-btn"),
+    presentScore: document.getElementById("present-score"),
+    presentScoreBody: document.getElementById("present-score-body"),
+    presentScoreClose: document.getElementById("present-score-close"),
+    presentHint: document.querySelector(".present-hint"),
+    scoreOverlay: document.getElementById("score-overlay"),
+    scoreTitle: document.getElementById("score-title"),
+    scoreBody: document.getElementById("score-body"),
+    scoreClose: document.getElementById("score-close"),
+    leaderboardSection: document.getElementById("leaderboard-section"),
+    leaderboardCols: document.getElementById("leaderboard-cols"),
+    matrixSection: document.getElementById("matrix-section"),
+    matrixCols: document.getElementById("matrix-cols")
   };
 
   function buildFilterChips(){
@@ -648,6 +878,10 @@
         h("div", { className: "stat-value", text: fmtTokens(tokens.input, tokens.output) })
       ]),
       h("div", { className: "stat-tile" }, [
+        h("div", { className: "stat-label", text: "Cache" }),
+        h("div", { className: "stat-value", text: fmtCache(tokens) })
+      ]),
+      h("div", { className: "stat-tile" }, [
         h("div", { className: "stat-label", text: "Duration" }),
         h("div", { className: "stat-value", text: fmtDuration(run.metrics ? run.metrics.durationSeconds : null) })
       ]),
@@ -662,26 +896,25 @@
     ]);
 
     var review = run.review || {};
-    var hasReview = review.playability !== null && review.playability !== undefined ||
+    // T1 v1 / T2 v2 runs (retired) carried a manual 1-5 rubric instead of a checklist;
+    // current runs never populate these fields, so only show this row if they do.
+    var hasLegacyRubric = review.playability !== null && review.playability !== undefined ||
                      review.creativity !== null && review.creativity !== undefined ||
                      review.visual !== null && review.visual !== undefined ||
                      review.taskFit !== null && review.taskFit !== undefined;
 
-    var reviewRow;
-    if (hasReview){
+    var reviewRow = null;
+    if (hasLegacyRubric){
       reviewRow = h("div", { className: "review-row" }, [
         scorePair("Playability", "playability", review.playability),
         scorePair("Creativity", "creativity", review.creativity),
         scorePair("Visual", "visual", review.visual),
         scorePair("Task fit", "taskFit", review.taskFit)
       ]);
-    } else {
-      reviewRow = h("div", { className: "review-row" }, [
-        h("span", { className: "awaiting", text: "awaiting review" })
-      ]);
     }
 
     var statusRow = h("div", { className: "status-row" }, [
+      checklistStatusChip(review),
       firstTryChip(review.firstTry),
       smokeChip(run.smoke)
     ]);
@@ -698,13 +931,23 @@
       text: "RESULT.md"
     });
 
+    var actionsLeft = [playBtn, resultLink];
+    if (scoring.enabled){
+      actionsLeft.push(h("button", {
+        type: "button",
+        className: "chip",
+        text: "✎ Score",
+        onClick: function(){ openScoreModal(run); }
+      }));
+    }
     var actionsRow = h("div", { className: "actions-row" }, [
-      h("div", { className: "actions-left" }, [playBtn, resultLink])
+      h("div", { className: "actions-left" }, actionsLeft)
     ]);
 
-    var body = h("div", { className: "card-body" }, [
-      titleRow, meta, statTiles, reviewRow, statusRow, actionsRow
-    ]);
+    var bodyChildren = [titleRow, meta, statTiles];
+    if (reviewRow) bodyChildren.push(reviewRow);
+    bodyChildren.push(statusRow, actionsRow);
+    var body = h("div", { className: "card-body" }, bodyChildren);
 
     return h("div", { className: "card" }, [buildPreview(run), body]);
   }
@@ -729,13 +972,11 @@
         h("td", { title: run.model, text: displayModel(run.model) }),
         tableCell((run.harness && run.harness.name) ? (run.harness.name + " " + (run.harness.version || "")) : "—"),
         tableCell(fmtTokens(tokens.input, tokens.output), true),
+        tableCell(fmtCache(tokens), true),
         tableCell(fmtDuration(run.metrics ? run.metrics.durationSeconds : null), true),
         tableCell(fmtCost(run.metrics ? run.metrics.costUsd : null), true),
         tableCell(fmtDiff(run.diff), true),
-        tableCell(review.playability != null ? review.playability + "/5" : "—", true),
-        tableCell(review.creativity != null ? review.creativity + "/5" : "—", true),
-        tableCell(review.visual != null ? review.visual + "/5" : "—", true),
-        tableCell(review.taskFit != null ? review.taskFit + "/5" : "—", true),
+        (function(){ return h("td", null, [checklistStatusChip(review)]); })(),
         (function(){ return h("td", null, [firstTryChip(review.firstTry)]); })(),
         (function(){ return h("td", null, [smokeChip(run.smoke)]); })(),
         (function(){
@@ -751,6 +992,102 @@
     });
   }
 
+  // cost cell contents for a run: FREE badge (+ list-price note) or plain USD
+  function costCellNodes(run){
+    var m = run.metrics || {};
+    var cost = m.costUsd;
+    if (cost === null || cost === undefined) return ["—"];
+    if (cost === 0){
+      var nodes = [h("span", { className: "badge-free", text: "FREE" })];
+      if (typeof m.costUsdList === "number"){
+        nodes.push(h("span", { className: "list-price-note", text: "list " + fmtUsd(m.costUsdList) + " *" }));
+      }
+      return nodes;
+    }
+    return [fmtUsd(cost)];
+  }
+
+  function buildLeaderboardRow(run, rank, status){
+    var rowClass = "leaderboard-row" + (status === "dnf" ? " dnf" : "") + (status === "unreviewed" ? " unreviewed" : "");
+    var children = [
+      h("span", { className: "leaderboard-rank", text: rank ? String(rank) : "—" }),
+      h("span", { className: "leaderboard-model", title: run.model, text: displayModel(run.model) }),
+      h("span", { className: "leaderboard-price" }, costCellNodes(run))
+    ];
+    if (status === "dnf") children.push(h("span", { className: "status-chip critical", text: "✗ DNF" }));
+    else if (status === "unreviewed") children.push(h("span", { className: "status-chip muted", text: "not scored yet" }));
+    return h("li", { className: rowClass }, children);
+  }
+
+  function buildLeaderboardCol(task, runs){
+    var col = h("div", { className: "leaderboard-col" }, [
+      h("h3", null, [badgeForTask(task), " cost leaderboard"])
+    ]);
+    if (!runs.length){
+      col.appendChild(h("div", { className: "leaderboard-empty", text: "No " + task + " runs yet" }));
+      return col;
+    }
+    var passing = runs.filter(function(r){ return checklistStatus(r.review) === "pass"; }).sort(byCostAsc);
+    var dnf = runs.filter(function(r){ return checklistStatus(r.review) === "dnf"; }).sort(byCostAsc);
+    var unreviewed = runs.filter(function(r){ return checklistStatus(r.review) === "unreviewed"; }).sort(byCostAsc);
+
+    var list = h("ol", { className: "leaderboard-list" });
+    passing.forEach(function(run, i){ list.appendChild(buildLeaderboardRow(run, i + 1, "pass")); });
+    dnf.forEach(function(run){ list.appendChild(buildLeaderboardRow(run, null, "dnf")); });
+    unreviewed.forEach(function(run){ list.appendChild(buildLeaderboardRow(run, null, "unreviewed")); });
+    col.appendChild(list);
+
+    var anyListed = runs.some(function(r){ return r.metrics && r.metrics.costUsd === 0 && typeof r.metrics.costUsdList === "number"; });
+    if (anyListed){
+      col.appendChild(h("div", { className: "leaderboard-footnote", text: "* ran free (promo); list-price equivalent shown" }));
+    }
+    return col;
+  }
+
+  function renderLeaderboards(){
+    els.leaderboardCols.innerHTML = "";
+    ["T1", "T2"].forEach(function(task){
+      var runs = state.runs.filter(function(r){ return r.task === task; });
+      if (!runs.length) return;
+      els.leaderboardCols.appendChild(buildLeaderboardCol(task, runs));
+    });
+  }
+
+  function buildMatrixBox(task, runs){
+    var keys = CHECKLIST_KEYS[task];
+    var box = h("div", { className: "matrix-box" }, [
+      h("h3", null, [badgeForTask(task), " checklist matrix"])
+    ]);
+    var scrollWrap = h("div", { className: "matrix-scroll" });
+    var headRow = h("tr", null, [h("th", { text: "Model" })].concat(keys.map(function(k){ return h("th", { text: k }); })));
+    var thead = h("thead", null, [headRow]);
+    var tbody = h("tbody");
+    runs.forEach(function(run){
+      var checklist = (run.review && run.review.checklist) || {};
+      var cells = keys.map(function(k){
+        var v = checklist[k];
+        var symbol = v === true ? "✓" : v === false ? "✗" : "–";
+        var cls = v === true ? "cell-pass" : v === false ? "cell-fail" : "cell-null";
+        return h("td", { className: cls, text: symbol });
+      });
+      var rowHead = h("th", { scope: "row", title: run.model, text: displayModel(run.model) });
+      tbody.appendChild(h("tr", null, [rowHead].concat(cells)));
+    });
+    var table = h("table", { className: "matrix-table" }, [thead, tbody]);
+    scrollWrap.appendChild(table);
+    box.appendChild(scrollWrap);
+    return box;
+  }
+
+  function renderMatrices(){
+    els.matrixCols.innerHTML = "";
+    ["T1", "T2"].forEach(function(task){
+      var runs = state.runs.filter(function(r){ return r.task === task; });
+      if (!runs.length) return;
+      els.matrixCols.appendChild(buildMatrixBox(task, runs));
+    });
+  }
+
   function render(){
     buildFilterChips();
     var runs = filteredSortedRuns();
@@ -758,6 +1095,8 @@
     renderTable(runs);
     els.grid.classList.toggle("hidden", state.view !== "cards");
     els.tableWrap.classList.toggle("hidden", state.view !== "table");
+    renderLeaderboards();
+    renderMatrices();
   }
 
   function openModal(run){
@@ -779,7 +1118,9 @@
   });
   document.addEventListener("keydown", function(e){
     if (present.active) return; // presentation overlay owns Escape while it is open
-    if (e.key === "Escape" && !els.modalOverlay.classList.contains("hidden")) closeModal();
+    if (e.key !== "Escape") return;
+    if (!els.scoreOverlay.classList.contains("hidden")) closeScoreModal();
+    else if (!els.modalOverlay.classList.contains("hidden")) closeModal();
   });
 
   els.viewToggle.querySelectorAll("button").forEach(function(btn){
@@ -790,7 +1131,8 @@
     });
   });
 
-  /* presentation mode: fullscreen blind-test viewer, model identity hidden until reveal */
+  /* presentation mode: fullscreen viewer, model name always visible, price hidden until
+     reveal. A live cost ladder tracks every run revealed so far in this session. */
   function presentLineupRuns(params){
     var ids = (params.get("lineup") || "").split(",").map(function(s){ return s.trim(); }).filter(Boolean);
     if (ids.length === 0) return [];
@@ -810,6 +1152,8 @@
     present.active = true;
     present.runs = runs;
     present.idx = 0;
+    present.revealed = {};
+    present.lastRevealedId = null;
     document.body.style.overflow = "hidden";
     els.presentOverlay.classList.remove("hidden");
     loadPresentRun();
@@ -817,7 +1161,11 @@
 
   function exitPresentation(){
     present.active = false;
+    present.revealed = {}; // live ladder is session-only, resets on exit
+    present.lastRevealedId = null;
     hideReveal();
+    hideLadder();
+    hideScorePanel();
     els.presentOverlay.classList.add("hidden");
     els.presentIframe.src = "about:blank";
     document.body.style.overflow = "";
@@ -828,53 +1176,55 @@
     if (!run) return;
     els.presentIframe.src = "runs/" + run.id + "/index.html";
     els.presentLabel.textContent = "";
-    var letter = String.fromCharCode(65 + present.idx);
-    els.presentLabel.appendChild(document.createTextNode("Contestant " + letter + " · " + (present.idx + 1) + " / " + present.runs.length + " "));
+    els.presentLabel.appendChild(document.createTextNode(displayModel(run.model) + " · " + (present.idx + 1) + "/" + present.runs.length + " "));
     els.presentLabel.appendChild(badgeForTask(run.task));
     hideReveal();
+    hideLadder();
+    if (!els.presentScore.classList.contains("hidden")) showScorePanel(); // keep the panel, on the new run
     els.presentPrev.disabled = present.idx === 0;
     els.presentNext.disabled = present.idx === present.runs.length - 1;
   }
 
   function buildPresentReveal(run){
     els.presentReveal.innerHTML = "";
-    var tokens = run.metrics && run.metrics.tokens ? run.metrics.tokens : {};
+    var m = run.metrics || {};
+    var cost = m.costUsd;
+    var listed = cost === 0 && typeof m.costUsdList === "number";
+
+    var priceEl = h("div", { className: "present-reveal-price" + (cost === 0 ? " free" : ""),
+      text: cost === 0 ? "FREE — $0.00" : fmtUsd(cost) });
+
+    var card = h("div", { className: "present-reveal-card" }, [priceEl]);
+
+    if (listed){
+      card.appendChild(h("div", { className: "present-reveal-listprice", text: "at list price: " + fmtUsd(m.costUsdList) + " *" }));
+    }
+
+    card.appendChild(h("div", { className: "present-reveal-status" }, [checklistStatusChip(run.review)]));
+
+    var tokens = m.tokens || {};
     var tiles = h("div", { className: "present-stat-tiles" }, [
       h("div", { className: "present-stat-tile" }, [
-        h("div", { className: "stat-label", text: "Cost" }),
-        h("div", { className: "stat-value", text: fmtCost(run.metrics ? run.metrics.costUsd : null) })
+        h("div", { className: "stat-label", text: "Duration" }),
+        h("div", { className: "stat-value", text: fmtDuration(m.durationSeconds) })
       ]),
       h("div", { className: "present-stat-tile" }, [
-        h("div", { className: "stat-label", text: "Duration" }),
-        h("div", { className: "stat-value", text: fmtDuration(run.metrics ? run.metrics.durationSeconds : null) })
+        h("div", { className: "stat-label", text: "Turns" }),
+        h("div", { className: "stat-value", text: (m.turns === null || m.turns === undefined) ? "—" : String(m.turns) })
       ]),
       h("div", { className: "present-stat-tile" }, [
         h("div", { className: "stat-label", text: "Tokens" }),
         h("div", { className: "stat-value", text: fmtTokens(tokens.input, tokens.output) })
       ]),
       h("div", { className: "present-stat-tile" }, [
-        h("div", { className: "stat-label", text: "Diff" }),
-        h("div", { className: "stat-value", text: fmtDiff(run.diff) })
+        h("div", { className: "stat-label", text: "Cache" }),
+        h("div", { className: "stat-value", text: fmtCache(tokens) })
       ])
     ]);
-    var card = h("div", { className: "present-reveal-card" }, [
-      h("div", { className: "present-reveal-name", text: displayModel(run.model) }),
-      h("div", { className: "present-reveal-full", text: run.model || "" }),
-      tiles
-    ]);
+    card.appendChild(tiles);
 
-    var review = run.review || {};
-    var hasReview = review.playability !== null && review.playability !== undefined ||
-                     review.creativity !== null && review.creativity !== undefined ||
-                     review.visual !== null && review.visual !== undefined ||
-                     review.taskFit !== null && review.taskFit !== undefined;
-    if (hasReview){
-      card.appendChild(h("div", { className: "review-row" }, [
-        scorePair("Playability", "playability", review.playability),
-        scorePair("Creativity", "creativity", review.creativity),
-        scorePair("Visual", "visual", review.visual),
-        scorePair("Task fit", "taskFit", review.taskFit)
-      ]));
+    if (listed){
+      card.appendChild(h("div", { className: "present-reveal-note", text: "* ran free (promo); list-price equivalent shown" }));
     }
     card.appendChild(h("div", { className: "present-footer", text: "click anywhere to continue" }));
     els.presentReveal.appendChild(card);
@@ -885,6 +1235,7 @@
     if (!run) return;
     buildPresentReveal(run);
     els.presentReveal.classList.remove("hidden");
+    present.revealed[run.id] = true; // audience now knows the price
   }
 
   function hideReveal(){
@@ -892,9 +1243,77 @@
     els.presentReveal.innerHTML = "";
   }
 
+  // user-triggered dismissal of an open reveal card: also kicks off the "slot in" ladder moment
+  function dismissReveal(){
+    if (els.presentReveal.classList.contains("hidden")) return;
+    var run = present.runs[present.idx];
+    hideReveal();
+    if (run) showLadder(true, run.id);
+  }
+
   function toggleReveal(){
     if (els.presentReveal.classList.contains("hidden")) showReveal();
-    else hideReveal();
+    else dismissReveal();
+  }
+
+  function revealedLadderRuns(){
+    return present.runs.filter(function(r){ return present.revealed[r.id]; });
+  }
+
+  function buildLadderRow(run, rank, isDnf){
+    var m = run.metrics || {};
+    var cost = m.costUsd;
+    var listed = cost === 0 && typeof m.costUsdList === "number";
+    var priceText = cost === 0 ? (listed ? fmtUsd(m.costUsdList) + " *" : "FREE") : fmtUsd(cost);
+    var status = checklistStatus(run.review);
+    var chip = status === "pass" ? h("span", { className: "status-chip good", text: "✓ PASS" })
+             : status === "dnf" ? h("span", { className: "status-chip critical", text: "✗ DNF" })
+             : h("span", { className: "status-chip muted", text: "unscored" });
+    var rowClass = "present-ladder-row" + (isDnf ? " dnf" : "") + (run.id === present.lastRevealedId ? " highlight" : "");
+    return h("li", { className: rowClass }, [
+      h("span", { className: "present-ladder-rank", text: rank ? String(rank) : "—" }),
+      h("span", { className: "present-ladder-model", title: run.model, text: displayModel(run.model) }),
+      badgeForTask(run.task),
+      h("span", { className: "present-ladder-price", text: priceText }),
+      chip
+    ]);
+  }
+
+  function renderLadder(){
+    var runs = revealedLadderRuns();
+    els.presentLadderList.innerHTML = "";
+    if (!runs.length){
+      els.presentLadderList.appendChild(h("li", { className: "present-ladder-empty", text: "Reveal a run to start the ladder" }));
+      return;
+    }
+    // DNF is out of the ranking regardless of price; pass + unreviewed share the
+    // price-ordered ranking (unreviewed just isn't confirmed a pass yet).
+    var dnf = runs.filter(function(r){ return checklistStatus(r.review) === "dnf"; }).sort(byCostAsc);
+    var ranked = runs.filter(function(r){ return checklistStatus(r.review) !== "dnf"; }).sort(byCostAsc);
+    ranked.forEach(function(run, i){ els.presentLadderList.appendChild(buildLadderRow(run, i + 1, false)); });
+    dnf.forEach(function(run){ els.presentLadderList.appendChild(buildLadderRow(run, null, true)); });
+  }
+
+  function showLadder(auto, highlightId){
+    if (highlightId !== undefined) present.lastRevealedId = highlightId;
+    renderLadder();
+    els.presentLadder.classList.remove("hidden");
+    if (ladderAutoHideTimer){ clearTimeout(ladderAutoHideTimer); ladderAutoHideTimer = null; }
+    if (auto){
+      ladderAutoHideTimer = setTimeout(hideLadder, 3500);
+    }
+  }
+
+  // clears the highlight too — it's only ever meaningful for the reveal that triggered it
+  function hideLadder(){
+    els.presentLadder.classList.add("hidden");
+    present.lastRevealedId = null;
+    if (ladderAutoHideTimer){ clearTimeout(ladderAutoHideTimer); ladderAutoHideTimer = null; }
+  }
+
+  function toggleLadder(){
+    if (els.presentLadder.classList.contains("hidden")) showLadder(false);
+    else hideLadder();
   }
 
   function presentPrev(){
@@ -915,22 +1334,203 @@
   els.presentPrev.addEventListener("click", presentPrev);
   els.presentNext.addEventListener("click", presentNext);
   els.presentRevealBtn.addEventListener("click", toggleReveal);
+  els.presentLadderBtn.addEventListener("click", function(){ toggleLadder(); });
+  els.presentLadderClose.addEventListener("click", hideLadder);
   els.presentExit.addEventListener("click", exitPresentation);
-  els.presentReveal.addEventListener("click", hideReveal);
+  els.presentReveal.addEventListener("click", dismissReveal);
 
   document.addEventListener("keydown", function(e){
     // once the user clicks into the sandboxed game iframe, keyboard events go to the
     // iframe, not this document, so these keys stop working — the on-screen buttons
     // are the reliable controls; keys work again after clicking back into the top bar.
     if (!present.active) return;
+    var t = e.target;
+    if (t && (t.tagName === "INPUT" || t.tagName === "TEXTAREA")) return; // typing notes
     if (e.key === "Escape"){
-      if (!els.presentReveal.classList.contains("hidden")) hideReveal();
+      if (!els.presentReveal.classList.contains("hidden")) dismissReveal();
+      else if (!els.presentScore.classList.contains("hidden")) hideScorePanel();
       else exitPresentation();
       return;
     }
     if (e.key === "ArrowLeft") presentPrev();
     else if (e.key === "ArrowRight") presentNext();
     else if (e.key === "r" || e.key === "R") toggleReveal();
+    else if (e.key === "l" || e.key === "L") toggleLadder();
+    else if ((e.key === "s" || e.key === "S") && scoring.enabled) toggleScorePanel();
+  });
+
+  /* scoring UI: exists only when the local bench server answers /api/ping (GitHub
+     Pages has no /api, so the public dashboard stays read-only). Edits update the
+     in-memory run immediately — chips, ladder, leaderboard and matrix follow live —
+     and are POSTed, debounced, to /api/review which merges them into runs/index.json. */
+  var scoring = { enabled: false, statusEl: null, statusRunId: null };
+  var pendingSaves = {};
+
+  function setSaveStatus(runId, text, ok){
+    if (scoring.statusRunId !== runId || !scoring.statusEl) return;
+    scoring.statusEl.textContent = text;
+    scoring.statusEl.className = "score-save-status" + (ok === true ? " ok" : ok === false ? " err" : "");
+  }
+
+  function flushSave(runId){
+    var p = pendingSaves[runId];
+    if (!p) return;
+    delete pendingSaves[runId];
+    var body = { id: runId };
+    if (p.sections.smoke) body.smoke = p.run.smoke;
+    if (p.sections.review) body.review = p.run.review;
+    fetch("/api/review", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(body)
+    }).then(function(res){
+      if (!res.ok) throw new Error("HTTP " + res.status);
+      setSaveStatus(runId, "saved ✓", true);
+    }).catch(function(){
+      setSaveStatus(runId, "save failed", false);
+    });
+  }
+
+  function markDirty(run, section){
+    var p = pendingSaves[run.id] || (pendingSaves[run.id] = { run: run, sections: {}, timer: null });
+    p.sections[section] = true;
+    if (p.timer) clearTimeout(p.timer);
+    p.timer = setTimeout(function(){ flushSave(run.id); }, 400);
+    setSaveStatus(run.id, "saving…", null);
+  }
+
+  // re-render everything derived from smoke/review so an edit shows up without reload
+  function refreshAfterScore(run){
+    render();
+    if (present.active){
+      if (!els.presentLadder.classList.contains("hidden")) renderLadder();
+      if (!els.presentReveal.classList.contains("hidden") && present.runs[present.idx] === run) buildPresentReveal(run);
+    }
+  }
+
+  function cycleTri(v){
+    return (v === null || v === undefined) ? true : v === true ? false : null;
+  }
+
+  // one clickable row cycling null → true → false → null; opts.yesNo renders
+  // yes/no instead of ✓/✗, opts.invert flips the good/bad coloring (console errors)
+  function triRow(label, get, set, run, section, opts){
+    opts = opts || {};
+    var valEl = h("span", { className: "score-val" });
+    function paint(){
+      var v = get();
+      valEl.textContent = v === true ? (opts.yesNo ? "yes" : "✓") : v === false ? (opts.yesNo ? "no" : "✗") : "–";
+      var good = opts.invert ? v === false : v === true;
+      var bad = opts.invert ? v === true : v === false;
+      valEl.className = "score-val " + (good ? "val-pass" : bad ? "val-fail" : "val-null");
+    }
+    paint();
+    return h("button", {
+      type: "button",
+      className: "score-row",
+      onClick: function(){
+        set(cycleTri(get()));
+        paint();
+        markDirty(run, section);
+        refreshAfterScore(run);
+      }
+    }, [h("span", { className: "score-key", text: label }), valEl]);
+  }
+
+  function notesInput(placeholder, get, set, run, section){
+    var input = h("input", { type: "text", className: "score-notes", placeholder: placeholder, value: get() || "" });
+    input.addEventListener("input", function(){
+      set(input.value);
+      markDirty(run, section); // notes drive no chips — no refresh needed while typing
+    });
+    return input;
+  }
+
+  function buildScoreContent(run){
+    run.smoke = run.smoke || {};
+    run.review = run.review || {};
+    run.review.checklist = run.review.checklist || {};
+    var checklist = run.review.checklist;
+    var wrap = h("div", { className: "score-content" });
+
+    wrap.appendChild(h("div", { className: "score-section", text: "Checklist" }));
+    var keys = CHECKLIST_KEYS[run.task] || Object.keys(checklist);
+    keys.forEach(function(k){
+      wrap.appendChild(triRow(k,
+        function(){ return checklist[k]; },
+        function(v){ checklist[k] = v; },
+        run, "review"));
+    });
+
+    wrap.appendChild(h("div", { className: "score-section", text: "Smoke" }));
+    wrap.appendChild(triRow("loads",
+      function(){ return run.smoke.loads; },
+      function(v){ run.smoke.loads = v; },
+      run, "smoke", { yesNo: true }));
+    wrap.appendChild(triRow("console errors",
+      function(){ var v = run.smoke.consoleErrors; return typeof v === "number" ? v > 0 : v; },
+      function(v){ run.smoke.consoleErrors = v; },
+      run, "smoke", { yesNo: true, invert: true }));
+    wrap.appendChild(notesInput("smoke notes",
+      function(){ return run.smoke.notes; },
+      function(v){ run.smoke.notes = v; },
+      run, "smoke"));
+
+    wrap.appendChild(h("div", { className: "score-section", text: "Review" }));
+    wrap.appendChild(triRow("first try",
+      function(){ return run.review.firstTry; },
+      function(v){ run.review.firstTry = v; },
+      run, "review", { yesNo: true }));
+    wrap.appendChild(notesInput("review notes",
+      function(){ return run.review.notes; },
+      function(v){ run.review.notes = v; },
+      run, "review"));
+
+    var status = h("div", { className: "score-save-status" });
+    scoring.statusEl = status;
+    scoring.statusRunId = run.id;
+    wrap.appendChild(status);
+    return wrap;
+  }
+
+  function showScorePanel(){
+    if (!scoring.enabled) return;
+    var run = present.runs[present.idx];
+    if (!run) return;
+    els.presentScoreBody.innerHTML = "";
+    els.presentScoreBody.appendChild(buildScoreContent(run));
+    els.presentScore.classList.remove("hidden");
+  }
+
+  function hideScorePanel(){
+    els.presentScore.classList.add("hidden");
+  }
+
+  function toggleScorePanel(){
+    if (els.presentScore.classList.contains("hidden")) showScorePanel();
+    else hideScorePanel();
+  }
+
+  function openScoreModal(run){
+    if (!scoring.enabled) return;
+    els.scoreTitle.textContent = "";
+    els.scoreTitle.appendChild(document.createTextNode("Score: " + displayModel(run.model) + " "));
+    els.scoreTitle.appendChild(badgeForTask(run.task));
+    els.scoreBody.innerHTML = "";
+    els.scoreBody.appendChild(buildScoreContent(run));
+    els.scoreOverlay.classList.remove("hidden");
+  }
+
+  function closeScoreModal(){
+    els.scoreOverlay.classList.add("hidden");
+    els.scoreBody.innerHTML = "";
+  }
+
+  els.presentScoreBtn.addEventListener("click", function(){ toggleScorePanel(); });
+  els.presentScoreClose.addEventListener("click", hideScorePanel);
+  els.scoreClose.addEventListener("click", closeScoreModal);
+  els.scoreOverlay.addEventListener("click", function(e){
+    if (e.target === els.scoreOverlay) closeScoreModal();
   });
 
   function showEmpty(){
@@ -938,6 +1538,8 @@
     els.toolbar.classList.add("hidden");
     els.grid.classList.add("hidden");
     els.tableWrap.classList.add("hidden");
+    els.leaderboardSection.classList.add("hidden");
+    els.matrixSection.classList.add("hidden");
   }
 
   function init(runs){
@@ -961,6 +1563,18 @@
     })
     .then(function(data){ init(Array.isArray(data) ? data : []); })
     .catch(function(){ init([]); });
+
+  // capability probe: only the local bench server answers — on GitHub Pages this
+  // fails and no scoring UI exists anywhere
+  fetch("/api/ping", { cache: "no-store" })
+    .then(function(res){
+      if (!res.ok) return;
+      scoring.enabled = true;
+      els.presentScoreBtn.classList.remove("hidden");
+      if (els.presentHint) els.presentHint.textContent = "←/→ games · R reveal · L ladder · S score · Esc exit";
+      if (state.runs.length) render(); // add the Score affordance to already-rendered cards
+    })
+    .catch(function(){});
 
 })();
 </script>

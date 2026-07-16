@@ -38,7 +38,7 @@ const TASKS: Record<string, string> = {
 // Review skeleton keys — must match the `Key` column of the task's checklist table.
 const CHECKLIST_CORE = [
   "loads", "startScreen", "controls", "collision", "score",
-  "difficulty", "restart", "sandbox", "lean", "honesty",
+  "difficulty", "restart", "sandbox", "lean", "juice", "powerup", "honesty",
 ];
 const CHECKLIST: Record<string, string[]> = {
   T1: CHECKLIST_CORE,
@@ -65,7 +65,6 @@ if (!TASKS[task] || !model.includes("/")) {
 
 const taskFile = join(ROOT, TASKS[task]);
 const prompt = readFileSync(taskFile, "utf8");
-const taskVersion = Number(prompt.match(/\(v(\d+)\)/)?.[1] ?? 1);
 
 const date = new Date().toISOString().slice(0, 10);
 const modelSlug = model.split("/")[1].replace(/[^a-z0-9.-]+/gi, "-").toLowerCase();
@@ -159,7 +158,7 @@ const repoStatusBefore = repoStatus();
 
 // ---------------------------------------------------------------- the run
 console.log(`▶ run ${id}`);
-console.log(`  task    ${TASKS[task]} (v${taskVersion})`);
+console.log(`  task    ${TASKS[task]}`);
 console.log(`  model   ${model}`);
 console.log(`  harness opencode ${harnessVersion}`);
 console.log(`  workdir ${work}\n`);
@@ -303,7 +302,6 @@ ledger.push({
   id,
   date,
   task,
-  taskVersion,
   base: "base-v1",
   harness: {
     name: "opencode",
@@ -342,7 +340,8 @@ writeFileSync(ledgerPath + ".tmp", JSON.stringify(ledger, null, 2) + "\n");
 renameSync(ledgerPath + ".tmp", ledgerPath);
 
 console.log(`\n✓ ${id} — ${durationSeconds}s, ${turns} steps, ` +
-  `${tokens.input + tokens.output} tokens (${tokens.input} in / ${tokens.output} out)` +
+  `${tokens.input + tokens.output} tokens (${tokens.input} in / ${tokens.output} out, ` +
+  `cache ${tokens.cacheRead} read / ${tokens.cacheWrite} write)` +
   (costSeen && cost > 0 ? `, $${cost.toFixed(2)}` : ""));
 console.log(`  play    runs/${id}/index.html  (serve the repo root over HTTP)`);
 console.log(`  result  runs/${id}/RESULT.md`);

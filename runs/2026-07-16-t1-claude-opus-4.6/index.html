@@ -1,0 +1,285 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Highway Dodger</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#111;display:flex;justify-content:center;align-items:center;height:100vh;overflow:hidden}
+canvas{display:block;background:#333}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+"use strict";
+(function(){
+
+const canvas=document.getElementById("c");
+const ctx=canvas.getContext("2d");
+const W=400,H=700;
+canvas.width=W;canvas.height=H;
+
+// Audio context
+let audioCtx=null;
+function ensureAudio(){if(!audioCtx)audioCtx=new(window.AudioContext||window.webkitAudioContext)()}
+function playTone(freq,dur,type,vol){
+  ensureAudio();
+  const o=audioCtx.createOscillator(),g=audioCtx.createGain();
+  o.type=type||"square";o.frequency.value=freq;
+  g.gain.value=vol||0.1;
+  o.connect(g);g.connect(audioCtx.destination);
+  o.start();g.gain.exponentialRampToValueAtTime(0.001,audioCtx.currentTime+dur);
+  o.stop(audioCtx.currentTime+dur);
+}
+function playCrash(){
+  ensureAudio();
+  const buf=audioCtx.createBuffer(1,audioCtx.sampleRate*0.4,audioCtx.sampleRate);
+  const d=buf.getChannelData(0);
+  for(let i=0;i<d.length;i++)d[i]=(Math.random()*2-1)*Math.exp(-i/(audioCtx.sampleRate*0.1));
+  const s=audioCtx.createBufferSource();s.buffer=buf;s.connect(audioCtx.destination);s.start();
+}
+function playPickup(){playTone(880,0.15,"sine",0.15);setTimeout(()=>playTone(1320,0.15,"sine",0.15),80)}
+
+// Game state
+const LANE_COUNT=4;
+const LANE_W=60;
+const ROAD_W=LANE_COUNT*LANE_W;
+const ROAD_X=(W-ROAD_W)/2;
+const CAR_W=36,CAR_H=60;
+
+let state="start"; // start, play, over
+let score,distance,speed,spawnTimer,spawnInterval,traffic,powerups,player;
+let keys={};
+let shieldActive,shieldTimer,particles;
+let shakeTimer,shakeMag;
+let engineTimer=0;
+let highScore=0;
+
+function reset(){
+  score=0;distance=0;speed=3;spawnTimer=0;spawnInterval=60;
+  traffic=[];powerups=[];particles=[];
+  shieldActive=false;shieldTimer=0;shakeTimer=0;shakeMag=0;
+  player={x:W/2-CAR_W/2,y:H-CAR_H-40,w:CAR_W,h:CAR_H};
+}
+
+function laneX(l){return ROAD_X+l*LANE_W+(LANE_W-CAR_W)/2}
+
+// Input
+document.addEventListener("keydown",function(e){
+  keys[e.key]=true;
+  if(state==="start"){state="play";reset();}
+  else if(state==="over"&&(e.key==="Enter"||e.key===" ")){state="play";reset();}
+});
+document.addEventListener("keyup",function(e){keys[e.key]=false});
+canvas.addEventListener("click",function(){
+  if(state==="start"){state="play";reset();}
+  else if(state==="over"){state="play";reset();}
+});
+
+function update(){
+  if(state!=="play")return;
+
+  // Difficulty ramp: speed and spawn rate increase over time
+  distance+=speed;
+  score=Math.floor(distance/10)*(shieldActive?1:1);
+  speed=3+distance*0.0008; // noticeable increase within 60s
+  spawnInterval=Math.max(15,60-distance*0.003);
+
+  // Player movement
+  const mv=5;
+  if(keys["ArrowLeft"]||keys["a"]||keys["A"])player.x-=mv;
+  if(keys["ArrowRight"]||keys["d"]||keys["D"])player.x+=mv;
+  if(keys["ArrowUp"]||keys["w"]||keys["W"])player.y-=mv*0.5;
+  if(keys["ArrowDown"]||keys["s"]||keys["S"])player.y+=mv*0.5;
+  player.x=Math.max(ROAD_X,Math.min(ROAD_X+ROAD_W-CAR_W,player.x));
+  player.y=Math.max(0,Math.min(H-CAR_H,player.y));
+
+  // Spawn traffic
+  spawnTimer++;
+  if(spawnTimer>=spawnInterval){
+    spawnTimer=0;
+    const lane=Math.floor(Math.random()*LANE_COUNT);
+    traffic.push({x:laneX(lane),y:-CAR_H,w:CAR_W,h:CAR_H,speed:speed*0.5+Math.random()*2});
+  }
+
+  // Spawn powerup occasionally
+  if(Math.random()<0.003&&powerups.length<1){
+    const lane=Math.floor(Math.random()*LANE_COUNT);
+    powerups.push({x:laneX(lane)+10,y:-30,w:20,h:20});
+  }
+
+  // Update traffic
+  for(let i=traffic.length-1;i>=0;i--){
+    traffic[i].y+=traffic[i].speed+speed*0.5;
+    if(traffic[i].y>H+100){traffic.splice(i,1);continue;}
+    if(!shieldActive&&collides(player,traffic[i])){
+      die();return;
+    }
+  }
+
+  // Update powerups
+  for(let i=powerups.length-1;i>=0;i--){
+    powerups[i].y+=speed;
+    if(powerups[i].y>H+50){powerups.splice(i,1);continue;}
+    if(collides(player,powerups[i])){
+      powerups.splice(i,1);
+      shieldActive=true;shieldTimer=300;
+      playPickup();
+    }
+  }
+
+  if(shieldActive){shieldTimer--;if(shieldTimer<=0)shieldActive=false;}
+
+  // Engine sound blip
+  engineTimer++;
+  if(engineTimer%20===0)playTone(80+speed*5,0.05,"sawtooth",0.03);
+
+  // Particles
+  for(let i=particles.length-1;i>=0;i--){
+    particles[i].life--;
+    particles[i].x+=particles[i].vx;
+    particles[i].y+=particles[i].vy;
+    if(particles[i].life<=0)particles.splice(i,1);
+  }
+
+  if(shakeTimer>0)shakeTimer--;
+}
+
+function die(){
+  playCrash();
+  // Explosion particles
+  for(let i=0;i<30;i++){
+    particles.push({x:player.x+CAR_W/2,y:player.y+CAR_H/2,
+      vx:(Math.random()-0.5)*6,vy:(Math.random()-0.5)*6,
+      life:30+Math.random()*20,color:`hsl(${Math.random()*60},100%,50%)`});
+  }
+  shakeTimer=20;shakeMag=8;
+  if(score>highScore)highScore=score;
+  state="over";
+}
+
+function collides(a,b){
+  return a.x<b.x+b.w&&a.x+a.w>b.x&&a.y<b.y+b.h&&a.y+a.h>b.y;
+}
+
+function draw(){
+  ctx.save();
+  if(shakeTimer>0){
+    const sx=(Math.random()-0.5)*shakeMag*(shakeTimer/20);
+    const sy=(Math.random()-0.5)*shakeMag*(shakeTimer/20);
+    ctx.translate(sx,sy);
+  }
+
+  // Background
+  ctx.fillStyle="#555";ctx.fillRect(0,0,W,H);
+
+  // Road
+  ctx.fillStyle="#333";ctx.fillRect(ROAD_X,0,ROAD_W,H);
+
+  // Lane markings (scrolling)
+  ctx.strokeStyle="#fff";ctx.setLineDash([30,20]);
+  const offset=(distance*2)%50;
+  for(let i=1;i<LANE_COUNT;i++){
+    ctx.beginPath();
+    ctx.moveTo(ROAD_X+i*LANE_W,offset-50);
+    ctx.lineTo(ROAD_X+i*LANE_W,H+50);
+    ctx.stroke();
+  }
+  ctx.setLineDash([]);
+
+  // Traffic
+  ctx.fillStyle="#c33";
+  for(const t of traffic){
+    drawCar(t.x,t.y,t.w,t.h,"#c33");
+  }
+
+  // Powerups
+  for(const p of powerups){
+    ctx.fillStyle="#0ff";
+    ctx.beginPath();ctx.arc(p.x+10,p.y+10,10,0,Math.PI*2);ctx.fill();
+    ctx.fillStyle="#fff";ctx.font="12px sans-serif";ctx.textAlign="center";
+    ctx.fillText("S",p.x+10,p.y+14);
+  }
+
+  // Player
+  if(state!=="over"){
+    drawCar(player.x,player.y,player.w,player.h,shieldActive?"#0ff":"#4a4");
+    if(shieldActive){
+      ctx.strokeStyle="rgba(0,255,255,0.5)";ctx.lineWidth=3;
+      ctx.strokeRect(player.x-4,player.y-4,player.w+8,player.h+8);
+      ctx.lineWidth=1;
+    }
+  }
+
+  // Particles
+  for(const p of particles){
+    ctx.globalAlpha=p.life/50;
+    ctx.fillStyle=p.color;
+    ctx.fillRect(p.x-3,p.y-3,6,6);
+  }
+  ctx.globalAlpha=1;
+
+  // Score during play
+  if(state==="play"){
+    ctx.fillStyle="#fff";ctx.font="20px monospace";ctx.textAlign="left";
+    ctx.fillText("Score: "+score,10,30);
+    if(shieldActive){
+      ctx.fillStyle="#0ff";ctx.fillText("SHIELD",10,55);
+    }
+  }
+
+  ctx.restore();
+
+  // Overlays (outside shake)
+  if(state==="start"){
+    ctx.fillStyle="rgba(0,0,0,0.7)";ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="#fff";ctx.font="bold 36px sans-serif";ctx.textAlign="center";
+    ctx.fillText("HIGHWAY DODGER",W/2,200);
+    ctx.font="18px sans-serif";
+    ctx.fillText("Arrow Keys / WASD to steer",W/2,280);
+    ctx.fillText("Dodge traffic, collect shields",W/2,320);
+    ctx.fillText("Press any key or click to start",W/2,400);
+  }
+
+  if(state==="over"){
+    ctx.fillStyle="rgba(0,0,0,0.6)";ctx.fillRect(0,0,W,H);
+    ctx.fillStyle="#f44";ctx.font="bold 32px sans-serif";ctx.textAlign="center";
+    ctx.fillText("GAME OVER",W/2,250);
+    ctx.fillStyle="#fff";ctx.font="22px sans-serif";
+    ctx.fillText("Score: "+score,W/2,300);
+    ctx.fillText("High: "+highScore,W/2,335);
+    ctx.fillText("Press Enter/Space or click",W/2,400);
+  }
+}
+
+function drawCar(x,y,w,h,color){
+  ctx.fillStyle=color;
+  ctx.fillRect(x+4,y,w-8,h);
+  ctx.fillStyle=shadeColor(color,-30);
+  ctx.fillRect(x,y+8,w,h-16);
+  // windshield
+  ctx.fillStyle="rgba(200,230,255,0.6)";
+  ctx.fillRect(x+8,y+6,w-16,12);
+}
+function shadeColor(c,pct){
+  // simple darken for hex
+  const num=parseInt(c.slice(1),16);
+  let r=(num>>16)+pct,g=((num>>8)&0xff)+pct,b=(num&0xff)+pct;
+  r=Math.max(0,Math.min(255,r));g=Math.max(0,Math.min(255,g));b=Math.max(0,Math.min(255,b));
+  return"#"+(r<<16|g<<8|b).toString(16).padStart(6,"0");
+}
+
+function loop(){
+  update();
+  draw();
+  requestAnimationFrame(loop);
+}
+
+reset();
+loop();
+
+})();
+</script>
+</body>
+</html>

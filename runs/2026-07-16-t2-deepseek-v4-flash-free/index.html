@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Highway Dodger 3D</title>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div id="game-container"></div>
+
+<div id="hud">
+  <span id="score-label">SCORE</span>
+  <span id="score">0</span>
+  <span id="shield-indicator"></span>
+</div>
+
+<div id="start-screen">
+  <h1>HIGHWAY DODGER 3D</h1>
+  <p class="subtitle">Dodge traffic. Survive. Score.</p>
+  <div class="controls-info">
+    <p><kbd>&larr;</kbd> <kbd>&rarr;</kbd> or <kbd>A</kbd> <kbd>D</kbd> to steer</p>
+    <p><kbd>SPACE</kbd> or click to start</p>
+  </div>
+  <button id="start-btn" class="action-btn">PLAY</button>
+</div>
+
+<div id="game-over">
+  <h1>GAME OVER</h1>
+  <p class="final-label">Score</p>
+  <p id="final-score" class="final-value">0</p>
+  <p class="final-label">Best</p>
+  <p id="high-score" class="final-value">0</p>
+  <p class="final-label">Press <kbd>SPACE</kbd> or click to restart</p>
+  <button id="restart-btn" class="action-btn">PLAY AGAIN</button>
+</div>
+
+<script src="three.min.js"></script>
+<script src="game.js"></script>
+</body>
+</html>

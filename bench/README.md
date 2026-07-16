@@ -5,9 +5,10 @@
 - **One shot.** One `opencode run` invocation with the frozen task prompt. No
   follow-up messages, no human answers, no retries. The model may iterate as much
   as it wants *within* the invocation (including checking its work in a browser).
-- **Frozen inputs.** Prompt = `tasks/<task>.md` verbatim (versioned in its H1);
-  starting code = `base/` (tag `base-v1`). Change either → bump the version, and
-  don't compare across versions.
+- **Frozen inputs.** Prompt = `tasks/<task>.md` verbatim; starting code = `base/`
+  (tag `base-v1`). There is only ever ONE version of the task: changing the prompt
+  or the base means wiping all existing runs (folders, transcripts, ledger) and
+  re-running everything — results never mix across task changes.
 - **Fixed toolbox.** Every run gets the same harness config, seeded by the runner:
   `permission: "allow"` (fully autonomous) + Playwright MCP (`npx @playwright/mcp`),
   so every model *can* look at its own game. No budget cap, no timeout — appetite

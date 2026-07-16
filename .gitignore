@@ -1,3 +1,4 @@
 node_modules/
 .DS_Store
 runs/*.transcript.jsonl
+TALK-NOTES.md

@@ -1,0 +1,29 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Lean Arcade</title>
+    <link rel="icon" href="favicon.ico">
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <div id="gameShell">
+        <canvas id="gameCanvas" width="420" height="720"></canvas>
+        <div id="hud">
+            <div>Score <span id="scoreValue">0</span></div>
+            <div>Best <span id="bestValue">0</span></div>
+            <div id="powerLabel">Power: none</div>
+        </div>
+        <div id="overlay" class="visible">
+            <div id="overlayCard">
+                <h1>Lean Arcade</h1>
+                <p>Dodge highway traffic as long as you can.</p>
+                <p>Controls: Arrow keys or WASD to steer.</p>
+                <p>Press any movement key or click to start.</p>
+            </div>
+        </div>
+    </div>
+    <script src="main.js"></script>
+</body>
+</html>

@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Endless Highway</title>
+<link rel="icon" href="data:,">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{background:#222;overflow:hidden;font-family:monospace}
+canvas{display:block;cursor:pointer}
+</style>
+</head>
+<body>
+<canvas id="c"></canvas>
+<script>
+'use strict';
+// No localStorage/sessionStorage/cookies - fully sandbox-compatible
+
+const c=document.getElementById('c');
+const ctx=c.getContext('2d');
+
+var RL,RR,LW;
+const LANES=3;
+function calcRoad(){
+ const rw=c.width*0.7;
+ RL=(c.width-rw)/2;
+ RR=RL+rw;
+ LW=rw/LANES;
+}
+function resize(){
+ c.width=innerWidth;
+ c.height=innerHeight;
+ calcRoad();
+}
+resize();
+addEventListener('resize',resize);
+
+// Audio (WebAudio, no assets)
+let actx=null;
+function initA(){if(!actx)actx=new(window.AudioContext||webkitAudioContext)()}
+let eng=null,engG=null;
+function engOn(){
+ if(!actx||eng)return;
+ eng=actx.createOscillator();
+ eng.type='sawtooth';
+ eng.frequency.setValueAtTime(70,actx.currentTime);
+ engG=actx.createGain();
+ engG.gain.setValueAtTime(0.03,actx.currentTime);
+ eng.connect(engG).connect(actx.destination);
+ eng.start();
+}
+function engOff(){if(eng){try{eng.stop()}catch(e){}eng=null;engG=null}}
+function sfxCrash(){
+ if(!actx)return;
+ const sr=actx.sampleRate,len=sr*0.25;
+ const b=actx.createBuffer(1,len,sr);
+ const d=b.getChannelData(0);
+ for(let i=0;i<len;i++)d[i]=(Math.random()*2-1)*(1-i/len);
+ const s=actx.createBufferSource();
+ s.buffer=b;
+ const g=actx.createGain();
+ g.gain.setValueAtTime(0.35,actx.currentTime);
+ g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+0.25);
+ s.connect(g).connect(actx.destination);
+ s.start();
+}
+function sfxPow(){
+ if(!actx)return;
+ const o=actx.createOscillator();
+ o.type='sine';
+ o.frequency.setValueAtTime(500,actx.currentTime);
+ o.frequency.exponentialRampToValueAtTime(1200,actx.currentTime+0.15);
+ const g=actx.createGain();
+ g.gain.setValueAtTime(0.2,actx.currentTime);
+ g.gain.exponentialRampToValueAtTime(0.001,actx.currentTime+0.25);
+ o.connect(g).connect(actx.destination);
+ o.start();o.stop(actx.currentTime+0.3);
+}
+
+const PW=28,PH=48;
+
+// Game state
+const M=0,P=1,O=2;
+let state=M;
+let score=0,best=0,frame=0,diff=1;
+let px=0,py=0,ps=0,shield=0,shake=0;
+let traffic=[],parts=[],powerup=null;
+let spawnTimer=0,nextId=0;
+
+function reset(){
+ frame=0;score=0;diff=1;shield=0;shake=0;ps=0;
+ px=RL+LW*1.5;py=c.height-120;
+ traffic=[];parts=[];powerup=null;spawnTimer=30;nextId=0;
+ state=P;
+ for(let i=0;i<5;i++)spawnCar(-50-i*130);
+}
+
+function spawnCar(y){
+ const ln=Math.floor(Math.random()*LANES);
+ const x=RL+LW*(ln+0.5);
+ const clr='hsl('+(Math.random()*360|0)+',70%,50%)';
+ traffic.push({x,y,w:PW,h:PH,id:nextId++,ln,clr});
+}
+
+// Input
+const K={};
+function isL(){return K['ArrowLeft']||K['a']||K['A']}
+function isR(){return K['ArrowRight']||K['d']||K['D']}
+
+function handleStart(){
+ if(state==M){initA();engOn();reset()}
+  else if(state==O){initA();engOn();reset();
+ }
+}
+
+addEventListener('keydown',e=>{
+ K[e.key]=true;
+ handleStart();
+});
+addEventListener('keyup',e=>{K[e.key]=false});
+addEventListener('click',()=>{handleStart()});
+
+// Collision (rect center-origin)
+function hit(a,b){
+ return Math.abs(a.x-b.x)<(a.w+b.w)/2&&Math.abs(a.y-b.y)<(a.h+b.h)/2;
+}
+
+// Car drawing with canvas (no external assets)
+function drawCar(x,y,w,h,clr,shd){
+ ctx.save();
+ ctx.translate(x,y);
+ // body
+ ctx.fillStyle=clr;
+ ctx.fillRect(-w/2,-h/2,w,h);
+ // windshield
+ ctx.fillStyle='rgba(200,230,255,0.35)';
+ ctx.fillRect(-w*0.3,-h*0.18,w*0.6,h*0.28);
+ // wheels
+ ctx.fillStyle='#222';
+ ctx.fillRect(-w/2-3,-h/3,4,h*0.18);
+ ctx.fillRect(-w/2-3,h/3,4,h*0.18);
+ ctx.fillRect(w/2-1,-h/3,4,h*0.18);
+ ctx.fillRect(w/2-1,h/3,4,h*0.18);
+ // shield glow
+ if(shd){
+  ctx.strokeStyle='rgba(0,200,255,'+(0.35+0.3*Math.sin(frame*0.08))+')';
+  ctx.lineWidth=3;
+  ctx.beginPath();
+  ctx.arc(0,0,Math.max(w,h)*0.75,0,Math.PI*2);
+  ctx.stroke();
+ }
+ ctx.restore();
+}
+
+function updateGame(){
+ if(state!=P)return;
+ frame++;
+ score=Math.floor(frame/3);
+ diff=Math.min(4,1+frame/1800);
+
+ // steering
+ if(isL())ps-=0.35;
+ if(isR())ps+=0.35;
+ ps*=0.82;
+ px+=ps;
+ const minX=RL+PW/2,maxX=RR-PW/2;
+ if(px<minX){px=minX;ps=0}
+ if(px>maxX){px=maxX;ps=0}
+
+ // shake decay
+ if(shake>0){shake*=0.88;if(shake<0.5)shake=0}
+ // shield
+ if(shield>0)shield--;
+
+ // spawn traffic
+ const spInt=Math.max(10,40/diff);
+ spawnTimer--;
+ if(spawnTimer<=0){
+  spawnCar(-PH);
+  spawnTimer=(spInt+Math.random()*spInt*0.5)|0;
+ }
+
+ // move traffic
+ const tSpd=1.8*diff;
+ for(let i=traffic.length-1;i>=0;i--){
+  const t=traffic[i];
+  t.y+=tSpd;
+  if(t.y>c.height+PH)traffic.splice(i,1);
+ }
+
+ // powerup
+ if(!powerup&&Math.random()<0.002){
+  const ln=Math.floor(Math.random()*LANES);
+  let ok=true;
+  for(const t of traffic){
+   if(t.ln==ln&&t.y<100){ok=false;break}
+  }
+  if(ok)powerup={x:RL+LW*(ln+0.5),y:-15};
+ }
+ if(powerup){
+  powerup.y+=tSpd;
+  if(powerup.y>c.height+20){
+   powerup=null;
+  }else if(!shield&&hit({x:px,y:py,w:PW,h:PH},{x:powerup.x,y:powerup.y,w:20,h:20})){
+   shield=300;powerup=null;sfxPow();
+  }
+ }
+
+ // collision
+ if(shield<=0){
+  for(const t of traffic){
+   if(hit({x:px,y:py,w:PW,h:PH},{x:t.x,y:t.y,w:PW,h:PH})){
+    doCrash();return;
+   }
+  }
+ }
+
+ // particles
+ for(let i=parts.length-1;i>=0;i--){
+  const p=parts[i];
+  p.x+=p.vx;p.y+=p.vy;p.vy+=0.07;p.life--;
+  if(p.life<=0)parts.splice(i,1);
+ }
+
+ // engine freq
+ if(eng&&actx)eng.frequency.setValueAtTime(70+diff*12,actx.currentTime);
+}
+
+function doCrash(){
+ state=O;shake=15;sfxCrash();engOff();
+ if(score>best)best=score;
+ for(let i=0;i<28;i++){
+  const a=Math.random()*Math.PI*2;
+  const sp=2+Math.random()*5;
+  parts.push({
+   x:px,y:py,
+   vx:Math.cos(a)*sp,vy:Math.sin(a)*sp,
+   life:45,r:2+Math.random()*4,
+   clr:'hsl('+(Math.random()*60+10|0)+',100%,55%)'
+  });
+ }
+}
+
+function drawScene(){
+ ctx.save();
+ if(shake>0.5)ctx.translate((Math.random()-0.5)*shake*2,(Math.random()-0.5)*shake*2);
+
+ // grass
+ ctx.fillStyle='#2a5a2a';
+ ctx.fillRect(0,0,c.width,c.height);
+
+ // road surface
+ ctx.fillStyle='#555';
+ ctx.fillRect(RL,0,RR-RL,c.height);
+
+ // scrolling lane dashes
+ ctx.strokeStyle='rgba(255,255,255,0.5)';
+ ctx.lineWidth=2;
+ ctx.setLineDash([18,22]);
+ const sc=(frame*1.5)%40;
+ for(let i=1;i<LANES;i++){
+  const x=RL+i*LW;
+  ctx.beginPath();
+  for(let y=-sc;y<c.height;y+=40){
+   ctx.moveTo(x,y);ctx.lineTo(x,y+18);
+  }
+  ctx.stroke();
+ }
+ ctx.setLineDash([]);
+
+ // road edges
+ ctx.strokeStyle='#ff0';
+ ctx.lineWidth=4;
+ ctx.beginPath();ctx.moveTo(RL,0);ctx.lineTo(RL,c.height);ctx.stroke();
+ ctx.beginPath();ctx.moveTo(RR,0);ctx.lineTo(RR,c.height);ctx.stroke();
+
+ // powerup
+ if(powerup&&powerup.y>0){
+  ctx.fillStyle='#0ff';
+  ctx.beginPath();
+  ctx.arc(powerup.x,powerup.y,10,0,Math.PI*2);
+  ctx.fill();
+  ctx.fillStyle='#fff';
+  ctx.font='bold 11px monospace';
+  ctx.textAlign='center';
+  ctx.textBaseline='middle';
+  ctx.fillText('S',powerup.x,powerup.y);
+ }
+
+ // traffic
+ for(const t of traffic){
+  drawCar(t.x,t.y,t.w,t.h,t.clr,false);
+ }
+
+ // player
+ drawCar(px,py,PW,PH,'#00f',shield>0);
+
+ // particles
+ for(const p of parts){
+  const a=p.life/45;
+  ctx.globalAlpha=a;
+  ctx.fillStyle=p.clr;
+  ctx.beginPath();
+  ctx.arc(p.x,p.y,p.r*a,0,Math.PI*2);
+  ctx.fill();
+ }
+ ctx.globalAlpha=1;
+
+ // HUD
+ ctx.fillStyle='#fff';
+ ctx.font='bold 20px monospace';
+ ctx.textAlign='left';
+ ctx.textBaseline='top';
+ ctx.fillText('Score: '+score,15,15);
+ if(best>0){
+  ctx.font='14px monospace';
+  ctx.fillStyle='#aaa';
+  ctx.fillText('Best: '+best,15,40);
+ }
+ if(shield>0){
+  ctx.fillStyle='#0ff';
+  ctx.font='16px monospace';
+  ctx.fillText('SHIELD '+(shield/60).toFixed(1)+'s',15,62);
+ }
+ // difficulty indicator
+ const lvl=Math.round(diff*10)/10;
+ ctx.fillStyle='#888';
+ ctx.font='12px monospace';
+ ctx.textAlign='right';
+ ctx.textBaseline='top';
+ ctx.fillText('Speed '+lvl.toFixed(1)+'x',c.width-15,15);
+
+ ctx.restore();
+}
+
+function drawMenu(){
+ ctx.save();
+ ctx.fillStyle='#222';
+ ctx.fillRect(0,0,c.width,c.height);
+ ctx.fillStyle='#fff';
+ ctx.textAlign='center';
+ ctx.textBaseline='middle';
+ ctx.font='bold 52px monospace';
+ ctx.fillText('ENDLESS HIGHWAY',c.width/2,c.height/2-80);
+ ctx.font='20px monospace';
+ ctx.fillStyle='#aaa';
+ ctx.fillText('Avoid traffic. Survive as long as possible.',c.width/2,c.height/2-20);
+ ctx.font='18px monospace';
+ ctx.fillStyle='#0ff';
+ ctx.fillText('Steer: Arrow Keys or WASD',c.width/2,c.height/2+30);
+ ctx.font='16px monospace';
+ ctx.fillStyle='#888';
+ ctx.fillText('Press any key or click to start',c.width/2,c.height/2+80);
+ ctx.restore();
+}
+
+function drawOver(){
+ drawScene();
+ ctx.save();
+ ctx.fillStyle='rgba(0,0,0,0.65)';
+ ctx.fillRect(0,0,c.width,c.height);
+ ctx.textAlign='center';
+ ctx.textBaseline='middle';
+ ctx.fillStyle='#f44';
+ ctx.font='bold 52px monospace';
+ ctx.fillText('CRASHED',c.width/2,c.height/2-70);
+ ctx.fillStyle='#fff';
+ ctx.font='30px monospace';
+ ctx.fillText('Score: '+score,c.width/2,c.height/2-10);
+ if(score==best&&best>0){
+  ctx.fillStyle='#ff0';
+  ctx.font='18px monospace';
+  ctx.fillText('NEW BEST!',c.width/2,c.height/2+35);
+ }
+ ctx.fillStyle='#aaa';
+ ctx.font='16px monospace';
+ ctx.fillText('Press any key or click to restart',c.width/2,c.height/2+80);
+ ctx.restore();
+}
+
+// Main loop
+function loop(){
+ requestAnimationFrame(loop);
+ if(state==M)drawMenu();
+ else if(state==P){updateGame();drawScene()}
+ else drawOver();
+}
+loop();
+</script>
+</body>
+</html>

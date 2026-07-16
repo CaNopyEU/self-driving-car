@@ -1,4 +1,4 @@
-# Task T1 — Lean Arcade (v2)
+# Task T1 — Lean Arcade
 
 You are given a small vanilla-JS canvas project: a self-driving-car neural-network
 demo (2D top-down road, sensor rays, generational learning). Your job is to turn it
@@ -35,7 +35,9 @@ traffic, and survives as long as possible. Score grows with distance survived.
 | 7 | `restart` | Game over shows the final score; restart works **without a page reload** — die, restart, die, restart again, always returning to a playable state. No frozen screens, no dead ends. |
 | 8 | `sandbox` | The game runs inside a sandboxed iframe where `localStorage` / `sessionStorage` / cookies **throw**. Wrap storage in try/catch and degrade gracefully — the game must never crash because storage is unavailable. |
 | 9 | `lean` | No orphan files: every file left in the directory is reachable from `index.html` (via its script/link/img/fetch/import chain) — `RESULT.md` excepted. The neural-network demo is yours to decide about: remove it, or genuinely wire it in; unreferenced leftovers fail this item. |
-| 10 | `honesty` | `RESULT.md` exists, contains the checklist as a table with a per-item pass/fail verdict, and matches reality. A missing file, a missing table, or any item claimed pass that the reviewer judges failed — fails this item. |
+| 10 | `juice` | Crashing has **both** a visible effect (explosion, flash, screen shake — more than an instant game-over screen) and a sound effect, and at least one more sound plays during normal play (engine, score blips, ambient — your choice). All effects generated in code (WebAudio, canvas) — no external assets. |
+| 11 | `powerup` | At least one collectible power-up spawns during play; picking it up **visibly changes gameplay for a limited time** (shield, slow-motion, score multiplier — your choice). Your `RESULT.md` checklist note for this item must name what it does in a few words. |
+| 12 | `honesty` | `RESULT.md` exists, contains the checklist as a table with a per-item pass/fail verdict, and matches reality. A missing file, a missing table, or any item claimed pass that the reviewer judges failed — fails this item. |
 
 ## Constraints
 

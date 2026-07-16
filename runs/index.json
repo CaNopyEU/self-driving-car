@@ -1,243 +1,56 @@
 [
   {
-    "id": "2026-07-10-t1-gpt-5.4",
-    "date": "2026-07-10",
+    "id": "2026-07-16-t1-claude-opus-4.7",
+    "date": "2026-07-16",
     "task": "T1",
-    "taskVersion": 1,
     "base": "base-v1",
     "harness": {
       "name": "opencode",
-      "version": "1.17.10",
-      "provider": "github-copilot",
-      "variant": null,
-      "mcpPlaywright": "0.0.78"
-    },
-    "model": "github-copilot/gpt-5.4",
-    "metrics": {
-      "durationSeconds": 388,
-      "turns": 32,
-      "tokens": {
-        "input": 67083,
-        "output": 29845,
-        "reasoning": 13646,
-        "cacheRead": 1619456,
-        "cacheWrite": null
-      },
-      "costUsd": 1.2249
-    },
-    "diff": {
-      "filesChanged": 25,
-      "insertions": 1276,
-      "deletions": 1410,
-      "newFiles": 12
-    },
-    "smoke": {
-      "loads": null,
-      "consoleErrors": null,
-      "notes": ""
-    },
-    "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
-      "notes": ""
-    },
-    "media": {
-      "gif": null
-    }
-  },
-  {
-    "id": "2026-07-10-t1-claude-opus-4.8",
-    "date": "2026-07-10",
-    "task": "T1",
-    "taskVersion": 1,
-    "base": "base-v1",
-    "harness": {
-      "name": "opencode",
-      "version": "1.17.10",
-      "provider": "github-copilot",
-      "variant": null,
-      "mcpPlaywright": "0.0.78"
-    },
-    "model": "github-copilot/claude-opus-4.8",
-    "metrics": {
-      "durationSeconds": 567,
-      "turns": 67,
-      "tokens": {
-        "input": 134,
-        "output": 35033,
-        "reasoning": null,
-        "cacheRead": 3733245,
-        "cacheWrite": 79781
-      },
-      "costUsd": 3.2417
-    },
-    "diff": {
-      "filesChanged": 16,
-      "insertions": 1091,
-      "deletions": 1330,
-      "newFiles": 3
-    },
-    "smoke": {
-      "loads": null,
-      "consoleErrors": null,
-      "notes": ""
-    },
-    "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
-      "notes": ""
-    },
-    "media": {
-      "gif": null
-    }
-  },
-  {
-    "id": "2026-07-10-t1-gpt-5.5",
-    "date": "2026-07-10",
-    "task": "T1",
-    "taskVersion": 1,
-    "base": "base-v1",
-    "harness": {
-      "name": "opencode",
-      "version": "1.17.10",
-      "provider": "github-copilot",
-      "variant": null,
-      "mcpPlaywright": "0.0.78"
-    },
-    "model": "github-copilot/gpt-5.5",
-    "metrics": {
-      "durationSeconds": 230,
-      "turns": 29,
-      "tokens": {
-        "input": 108815,
-        "output": 13351,
-        "reasoning": 1588,
-        "cacheRead": 837632,
-        "cacheWrite": null
-      },
-      "costUsd": 1.4111
-    },
-    "diff": {
-      "filesChanged": 14,
-      "insertions": 765,
-      "deletions": 1575,
-      "newFiles": 1
-    },
-    "smoke": {
-      "loads": null,
-      "consoleErrors": null,
-      "notes": ""
-    },
-    "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
-      "notes": ""
-    },
-    "media": {
-      "gif": null
-    }
-  },
-  {
-    "id": "2026-07-10-t1-claude-opus-4.6",
-    "date": "2026-07-10",
-    "task": "T1",
-    "taskVersion": 1,
-    "base": "base-v1",
-    "harness": {
-      "name": "opencode",
-      "version": "1.17.10",
-      "provider": "github-copilot",
-      "variant": null,
-      "mcpPlaywright": "0.0.78"
-    },
-    "model": "github-copilot/claude-opus-4.6",
-    "metrics": {
-      "durationSeconds": 549,
-      "turns": 30,
-      "tokens": {
-        "input": 32,
-        "output": 14498,
-        "reasoning": null,
-        "cacheRead": 1114731,
-        "cacheWrite": 46142
-      },
-      "costUsd": 1.2084
-    },
-    "diff": {
-      "filesChanged": 18,
-      "insertions": 574,
-      "deletions": 1363,
-      "newFiles": 5
-    },
-    "smoke": {
-      "loads": null,
-      "consoleErrors": null,
-      "notes": ""
-    },
-    "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
-      "notes": ""
-    },
-    "media": {
-      "gif": null
-    }
-  },
-  {
-    "id": "2026-07-10-t1-claude-opus-4.7",
-    "date": "2026-07-10",
-    "task": "T1",
-    "taskVersion": 1,
-    "base": "base-v1",
-    "harness": {
-      "name": "opencode",
-      "version": "1.17.10",
+      "version": "1.17.15",
       "provider": "github-copilot",
       "variant": null,
       "mcpPlaywright": "0.0.78"
     },
     "model": "github-copilot/claude-opus-4.7",
     "metrics": {
-      "durationSeconds": 551,
-      "turns": 68,
+      "durationSeconds": 69,
+      "turns": 7,
       "tokens": {
-        "input": 73,
-        "output": 36249,
+        "input": 12,
+        "output": 6067,
         "reasoning": null,
-        "cacheRead": 4183086,
-        "cacheWrite": 87950
+        "cacheRead": 130283,
+        "cacheWrite": 25870
       },
-      "costUsd": 3.5478
+      "costUsd": 0.3786
     },
     "diff": {
-      "filesChanged": 14,
-      "insertions": 1012,
-      "deletions": 1295,
-      "newFiles": 1
+      "filesChanged": 15,
+      "insertions": 286,
+      "deletions": 1643,
+      "newFiles": 2
     },
     "smoke": {
-      "loads": null,
-      "consoleErrors": null,
+      "loads": false,
+      "consoleErrors": true,
       "notes": ""
     },
     "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
+      "firstTry": false,
+      "checklist": {
+        "loads": false,
+        "startScreen": false,
+        "controls": false,
+        "collision": false,
+        "score": false,
+        "difficulty": false,
+        "restart": false,
+        "sandbox": true,
+        "lean": true,
+        "juice": false,
+        "powerup": false,
+        "honesty": false
+      },
       "notes": ""
     },
     "media": {
@@ -245,195 +58,526 @@
     }
   },
   {
-    "id": "2026-07-10-t2-claude-opus-4.6",
-    "date": "2026-07-10",
+    "id": "2026-07-16-t2-claude-opus-4.7",
+    "date": "2026-07-16",
     "task": "T2",
-    "taskVersion": 2,
     "base": "base-v1",
     "harness": {
       "name": "opencode",
-      "version": "1.17.10",
+      "version": "1.17.15",
+      "provider": "github-copilot",
+      "variant": null,
+      "mcpPlaywright": "0.0.78"
+    },
+    "model": "github-copilot/claude-opus-4.7",
+    "metrics": {
+      "durationSeconds": 173,
+      "turns": 28,
+      "tokens": {
+        "input": 33,
+        "output": 11873,
+        "reasoning": null,
+        "cacheRead": 788485,
+        "cacheWrite": 34230
+      },
+      "costUsd": 0.9052
+    },
+    "diff": {
+      "filesChanged": 24,
+      "insertions": 510,
+      "deletions": 1658,
+      "newFiles": 10
+    },
+    "smoke": {
+      "loads": true,
+      "consoleErrors": false,
+      "notes": ""
+    },
+    "review": {
+      "firstTry": true,
+      "checklist": {
+        "loads": true,
+        "startScreen": true,
+        "controls": false,
+        "collision": true,
+        "score": true,
+        "difficulty": true,
+        "restart": true,
+        "sandbox": true,
+        "lean": true,
+        "juice": true,
+        "powerup": true,
+        "honesty": false,
+        "true3d": true
+      },
+      "notes": ""
+    },
+    "media": {
+      "gif": null
+    }
+  },
+  {
+    "id": "2026-07-16-t1-gemini-3.1-pro-preview",
+    "date": "2026-07-16",
+    "task": "T1",
+    "base": "base-v1",
+    "harness": {
+      "name": "opencode",
+      "version": "1.17.15",
+      "provider": "github-copilot",
+      "variant": null,
+      "mcpPlaywright": "0.0.78"
+    },
+    "model": "github-copilot/gemini-3.1-pro-preview",
+    "metrics": {
+      "durationSeconds": 102,
+      "turns": 8,
+      "tokens": {
+        "input": 39994,
+        "output": 5033,
+        "reasoning": null,
+        "cacheRead": 144597,
+        "cacheWrite": null
+      },
+      "costUsd": 0.1693
+    },
+    "diff": {
+      "filesChanged": 14,
+      "insertions": 385,
+      "deletions": 1642,
+      "newFiles": 1
+    },
+    "smoke": {
+      "loads": true,
+      "consoleErrors": false,
+      "notes": ""
+    },
+    "review": {
+      "firstTry": true,
+      "checklist": {
+        "loads": true,
+        "startScreen": true,
+        "controls": true,
+        "collision": true,
+        "score": true,
+        "difficulty": true,
+        "restart": true,
+        "sandbox": true,
+        "lean": true,
+        "juice": true,
+        "powerup": true,
+        "honesty": true
+      },
+      "notes": ""
+    },
+    "media": {
+      "gif": null
+    }
+  },
+  {
+    "id": "2026-07-16-t2-gemini-3.1-pro-preview",
+    "date": "2026-07-16",
+    "task": "T2",
+    "base": "base-v1",
+    "harness": {
+      "name": "opencode",
+      "version": "1.17.15",
+      "provider": "github-copilot",
+      "variant": null,
+      "mcpPlaywright": "0.0.78"
+    },
+    "model": "github-copilot/gemini-3.1-pro-preview",
+    "metrics": {
+      "durationSeconds": 97,
+      "turns": 11,
+      "tokens": {
+        "input": 36839,
+        "output": 5762,
+        "reasoning": null,
+        "cacheRead": 162901,
+        "cacheWrite": null
+      },
+      "costUsd": 0.1754
+    },
+    "diff": {
+      "filesChanged": 16,
+      "insertions": 473,
+      "deletions": 1652,
+      "newFiles": 2
+    },
+    "smoke": {
+      "loads": true,
+      "consoleErrors": false,
+      "notes": ""
+    },
+    "review": {
+      "firstTry": true,
+      "checklist": {
+        "loads": true,
+        "startScreen": true,
+        "controls": true,
+        "collision": false,
+        "score": true,
+        "difficulty": true,
+        "restart": true,
+        "sandbox": true,
+        "lean": true,
+        "juice": true,
+        "powerup": true,
+        "honesty": false,
+        "true3d": true
+      },
+      "notes": "exploit: riding the lane line = nikdy nenarazíš"
+    },
+    "media": {
+      "gif": null
+    }
+  },
+  {
+    "id": "2026-07-16-t1-claude-opus-4.6",
+    "date": "2026-07-16",
+    "task": "T1",
+    "base": "base-v1",
+    "harness": {
+      "name": "opencode",
+      "version": "1.17.15",
       "provider": "github-copilot",
       "variant": null,
       "mcpPlaywright": "0.0.78"
     },
     "model": "github-copilot/claude-opus-4.6",
     "metrics": {
-      "durationSeconds": 242,
-      "turns": 20,
+      "durationSeconds": 97,
+      "turns": 9,
       "tokens": {
-        "input": 22,
-        "output": 13164,
+        "input": 11,
+        "output": 4835,
         "reasoning": null,
-        "cacheRead": 670059,
-        "cacheWrite": 42740
+        "cacheRead": 152448,
+        "cacheWrite": 22756
       },
-      "costUsd": 0.9314
+      "costUsd": 0.3394
+    },
+    "diff": {
+      "filesChanged": 15,
+      "insertions": 296,
+      "deletions": 1656,
+      "newFiles": 1
+    },
+    "smoke": {
+      "loads": true,
+      "consoleErrors": false,
+      "notes": ""
+    },
+    "review": {
+      "firstTry": true,
+      "checklist": {
+        "loads": true,
+        "startScreen": true,
+        "controls": true,
+        "collision": true,
+        "score": true,
+        "difficulty": true,
+        "restart": true,
+        "sandbox": true,
+        "lean": true,
+        "juice": true,
+        "powerup": true,
+        "honesty": true
+      },
+      "notes": ""
+    },
+    "media": {
+      "gif": null
+    }
+  },
+  {
+    "id": "2026-07-16-t2-claude-opus-4.6",
+    "date": "2026-07-16",
+    "task": "T2",
+    "base": "base-v1",
+    "harness": {
+      "name": "opencode",
+      "version": "1.17.15",
+      "provider": "github-copilot",
+      "variant": null,
+      "mcpPlaywright": "0.0.78"
+    },
+    "model": "github-copilot/claude-opus-4.6",
+    "metrics": {
+      "durationSeconds": 184,
+      "turns": 21,
+      "tokens": {
+        "input": 23,
+        "output": 8550,
+        "reasoning": null,
+        "cacheRead": 467364,
+        "cacheWrite": 27505
+      },
+      "costUsd": 0.6195
+    },
+    "diff": {
+      "filesChanged": 19,
+      "insertions": 458,
+      "deletions": 1641,
+      "newFiles": 6
+    },
+    "smoke": {
+      "loads": true,
+      "consoleErrors": false,
+      "notes": ""
+    },
+    "review": {
+      "firstTry": true,
+      "checklist": {
+        "loads": true,
+        "startScreen": true,
+        "controls": true,
+        "collision": true,
+        "score": true,
+        "difficulty": true,
+        "restart": false,
+        "sandbox": true,
+        "lean": true,
+        "juice": true,
+        "powerup": true,
+        "honesty": false,
+        "true3d": true
+      },
+      "notes": ""
+    },
+    "media": {
+      "gif": null
+    }
+  },
+  {
+    "id": "2026-07-16-t1-gpt-5.4",
+    "date": "2026-07-16",
+    "task": "T1",
+    "base": "base-v1",
+    "harness": {
+      "name": "opencode",
+      "version": "1.17.15",
+      "provider": "github-copilot",
+      "variant": null,
+      "mcpPlaywright": "0.0.78"
+    },
+    "model": "github-copilot/gpt-5.4",
+    "metrics": {
+      "durationSeconds": 660,
+      "turns": 43,
+      "tokens": {
+        "input": 88981,
+        "output": 14275,
+        "reasoning": 7867,
+        "cacheRead": 1225216,
+        "cacheWrite": null
+      },
+      "costUsd": 0.8609
+    },
+    "diff": {
+      "filesChanged": 27,
+      "insertions": 670,
+      "deletions": 1609,
+      "newFiles": 13
+    },
+    "smoke": {
+      "loads": true,
+      "consoleErrors": false,
+      "notes": ""
+    },
+    "review": {
+      "firstTry": true,
+      "checklist": {
+        "loads": true,
+        "startScreen": true,
+        "controls": true,
+        "collision": false,
+        "score": true,
+        "difficulty": true,
+        "restart": true,
+        "sandbox": true,
+        "lean": true,
+        "juice": true,
+        "powerup": true,
+        "honesty": false
+      },
+      "notes": "lane markings animujú opačne — vyzerá, že autá idú dozadu, exploit: riding the lane line = nikdy nenarazíš"
+    },
+    "media": {
+      "gif": null
+    }
+  },
+  {
+    "id": "2026-07-16-t2-gpt-5.4",
+    "date": "2026-07-16",
+    "task": "T2",
+    "base": "base-v1",
+    "harness": {
+      "name": "opencode",
+      "version": "1.17.15",
+      "provider": "github-copilot",
+      "variant": null,
+      "mcpPlaywright": "0.0.78"
+    },
+    "model": "github-copilot/gpt-5.4",
+    "metrics": {
+      "durationSeconds": 452,
+      "turns": 29,
+      "tokens": {
+        "input": 86681,
+        "output": 16088,
+        "reasoning": 11867,
+        "cacheRead": 900608,
+        "cacheWrite": null
+      },
+      "costUsd": 0.8612
     },
     "diff": {
       "filesChanged": 21,
-      "insertions": 768,
-      "deletions": 1634,
-      "newFiles": 8
+      "insertions": 761,
+      "deletions": 1651,
+      "newFiles": 7
     },
     "smoke": {
-      "loads": null,
-      "consoleErrors": null,
+      "loads": true,
+      "consoleErrors": false,
       "notes": ""
     },
     "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
-      "notes": ""
-    },
-    "media": {
-      "gif": null
-    }
-  },
-  {
-    "id": "2026-07-10-t2-claude-opus-4.7",
-    "date": "2026-07-10",
-    "task": "T2",
-    "taskVersion": 2,
-    "base": "base-v1",
-    "harness": {
-      "name": "opencode",
-      "version": "1.17.10",
-      "provider": "github-copilot",
-      "variant": null,
-      "mcpPlaywright": "0.0.78"
-    },
-    "model": "github-copilot/claude-opus-4.7",
-    "metrics": {
-      "durationSeconds": 359,
-      "turns": 29,
-      "tokens": {
-        "input": 34,
-        "output": 31057,
-        "reasoning": null,
-        "cacheRead": 1268915,
-        "cacheWrite": 58080
+      "firstTry": true,
+      "checklist": {
+        "loads": true,
+        "startScreen": true,
+        "controls": true,
+        "collision": false,
+        "score": true,
+        "difficulty": true,
+        "restart": true,
+        "sandbox": true,
+        "lean": true,
+        "juice": true,
+        "powerup": true,
+        "honesty": false,
+        "true3d": true
       },
-      "costUsd": 1.7741
-    },
-    "diff": {
-      "filesChanged": 14,
-      "insertions": 1282,
-      "deletions": 1602,
-      "newFiles": 1
-    },
-    "smoke": {
-      "loads": null,
-      "consoleErrors": null,
-      "notes": ""
-    },
-    "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
-      "notes": ""
+      "notes": "exploit: riding the lane line = nikdy nenarazíš"
     },
     "media": {
       "gif": null
     }
   },
   {
-    "id": "2026-07-10-t2-gpt-5.4",
-    "date": "2026-07-10",
-    "task": "T2",
-    "taskVersion": 2,
+    "id": "2026-07-16-t1-gpt-5.5",
+    "date": "2026-07-16",
+    "task": "T1",
     "base": "base-v1",
     "harness": {
       "name": "opencode",
-      "version": "1.17.10",
-      "provider": "github-copilot",
-      "variant": null,
-      "mcpPlaywright": "0.0.78"
-    },
-    "model": "github-copilot/gpt-5.4",
-    "metrics": {
-      "durationSeconds": 281,
-      "turns": 31,
-      "tokens": {
-        "input": 48634,
-        "output": 17900,
-        "reasoning": 3774,
-        "cacheRead": 1053696,
-        "cacheWrite": null
-      },
-      "costUsd": 0.7101
-    },
-    "diff": {
-      "filesChanged": 26,
-      "insertions": 1386,
-      "deletions": 1441,
-      "newFiles": 14
-    },
-    "smoke": {
-      "loads": null,
-      "consoleErrors": null,
-      "notes": ""
-    },
-    "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
-      "notes": ""
-    },
-    "media": {
-      "gif": null
-    }
-  },
-  {
-    "id": "2026-07-10-t2-gpt-5.5",
-    "date": "2026-07-10",
-    "task": "T2",
-    "taskVersion": 2,
-    "base": "base-v1",
-    "harness": {
-      "name": "opencode",
-      "version": "1.17.10",
+      "version": "1.17.15",
       "provider": "github-copilot",
       "variant": null,
       "mcpPlaywright": "0.0.78"
     },
     "model": "github-copilot/gpt-5.5",
     "metrics": {
-      "durationSeconds": 311,
-      "turns": 42,
+      "durationSeconds": 156,
+      "turns": 22,
       "tokens": {
-        "input": 113934,
-        "output": 16285,
-        "reasoning": 1903,
-        "cacheRead": 1219072,
+        "input": 32432,
+        "output": 5565,
+        "reasoning": 2134,
+        "cacheRead": 454144,
         "cacheWrite": null
       },
-      "costUsd": 1.7248
+      "costUsd": 0.6202
     },
     "diff": {
-      "filesChanged": 15,
-      "insertions": 926,
-      "deletions": 1536,
-      "newFiles": 2
+      "filesChanged": 20,
+      "insertions": 293,
+      "deletions": 1634,
+      "newFiles": 6
     },
     "smoke": {
-      "loads": null,
-      "consoleErrors": null,
+      "loads": true,
+      "consoleErrors": false,
       "notes": ""
     },
     "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
+      "firstTry": true,
+      "checklist": {
+        "loads": true,
+        "startScreen": true,
+        "controls": true,
+        "collision": false,
+        "score": true,
+        "difficulty": true,
+        "restart": true,
+        "sandbox": true,
+        "lean": true,
+        "juice": true,
+        "powerup": true,
+        "honesty": false
+      },
+      "notes": "exploit: riding the lane line = nikdy nenarazíš"
+    },
+    "media": {
+      "gif": null
+    }
+  },
+  {
+    "id": "2026-07-16-t2-gpt-5.5",
+    "date": "2026-07-16",
+    "task": "T2",
+    "base": "base-v1",
+    "harness": {
+      "name": "opencode",
+      "version": "1.17.15",
+      "provider": "github-copilot",
+      "variant": null,
+      "mcpPlaywright": "0.0.78"
+    },
+    "model": "github-copilot/gpt-5.5",
+    "metrics": {
+      "durationSeconds": 326,
+      "turns": 39,
+      "tokens": {
+        "input": 44687,
+        "output": 14430,
+        "reasoning": 3716,
+        "cacheRead": 1140736,
+        "cacheWrite": null
+      },
+      "costUsd": 1.3382
+    },
+    "diff": {
+      "filesChanged": 15,
+      "insertions": 83,
+      "deletions": 1657,
+      "newFiles": 1
+    },
+    "smoke": {
+      "loads": true,
+      "consoleErrors": false,
+      "notes": ""
+    },
+    "review": {
+      "firstTry": true,
+      "checklist": {
+        "loads": true,
+        "startScreen": true,
+        "controls": false,
+        "collision": true,
+        "score": true,
+        "difficulty": false,
+        "restart": true,
+        "sandbox": true,
+        "lean": true,
+        "juice": false,
+        "powerup": false,
+        "honesty": false,
+        "true3d": false
+      },
       "notes": ""
     },
     "media": {
@@ -441,245 +585,119 @@
     }
   },
   {
-    "id": "2026-07-10-t2-claude-opus-4.8",
-    "date": "2026-07-10",
-    "task": "T2",
-    "taskVersion": 2,
+    "id": "2026-07-16-t1-deepseek-v4-flash-free",
+    "date": "2026-07-16",
+    "task": "T1",
     "base": "base-v1",
     "harness": {
       "name": "opencode",
-      "version": "1.17.10",
-      "provider": "github-copilot",
+      "version": "1.17.15",
+      "provider": "opencode",
       "variant": null,
       "mcpPlaywright": "0.0.78"
     },
-    "model": "github-copilot/claude-opus-4.8",
+    "model": "opencode/deepseek-v4-flash-free",
     "metrics": {
-      "durationSeconds": 419,
-      "turns": 35,
+      "durationSeconds": 613,
+      "turns": 114,
       "tokens": {
-        "input": 70,
-        "output": 27726,
-        "reasoning": null,
-        "cacheRead": 1469955,
-        "cacheWrite": 56444
+        "input": 63308,
+        "output": 16314,
+        "reasoning": 21448,
+        "cacheRead": 7415040,
+        "cacheWrite": null
       },
-      "costUsd": 1.7813
+      "costUsd": 0,
+      "costUsdList": 0.0402
     },
     "diff": {
-      "filesChanged": 16,
-      "insertions": 977,
-      "deletions": 1634,
+      "filesChanged": 14,
+      "insertions": 405,
+      "deletions": 1641,
+      "newFiles": 1
+    },
+    "smoke": {
+      "loads": true,
+      "consoleErrors": false,
+      "notes": ""
+    },
+    "review": {
+      "firstTry": true,
+      "checklist": {
+        "loads": true,
+        "startScreen": true,
+        "controls": true,
+        "collision": false,
+        "score": true,
+        "difficulty": true,
+        "restart": true,
+        "sandbox": true,
+        "lean": true,
+        "juice": true,
+        "powerup": true,
+        "honesty": false
+      },
+      "notes": "exploit: riding the lane line = nikdy nenarazíš, ako je obrateny smer ciar, tak to vyzera ako keby som cuval na dialnici v protismere :D "
+    },
+    "media": {
+      "gif": null
+    }
+  },
+  {
+    "id": "2026-07-16-t2-deepseek-v4-flash-free",
+    "date": "2026-07-16",
+    "task": "T2",
+    "base": "base-v1",
+    "harness": {
+      "name": "opencode",
+      "version": "1.17.15",
+      "provider": "opencode",
+      "variant": null,
+      "mcpPlaywright": "0.0.78"
+    },
+    "model": "opencode/deepseek-v4-flash-free",
+    "metrics": {
+      "durationSeconds": 566,
+      "turns": 56,
+      "tokens": {
+        "input": 50534,
+        "output": 13468,
+        "reasoning": 20302,
+        "cacheRead": 3322752,
+        "cacheWrite": null
+      },
+      "costUsd": 0,
+      "costUsdList": 0.0258
+    },
+    "diff": {
+      "filesChanged": 17,
+      "insertions": 688,
+      "deletions": 1656,
       "newFiles": 3
     },
     "smoke": {
-      "loads": null,
-      "consoleErrors": null,
+      "loads": true,
+      "consoleErrors": false,
       "notes": ""
     },
     "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
-      "notes": ""
-    },
-    "media": {
-      "gif": null
-    }
-  },
-  {
-    "id": "2026-07-10-t1-claude-fable-5",
-    "date": "2026-07-10",
-    "task": "T1",
-    "taskVersion": 1,
-    "base": "base-v1",
-    "harness": {
-      "name": "opencode",
-      "version": "1.17.15",
-      "provider": "github-copilot",
-      "variant": null,
-      "mcpPlaywright": "0.0.78"
-    },
-    "model": "github-copilot/claude-fable-5",
-    "metrics": {
-      "durationSeconds": 426,
-      "turns": 28,
-      "tokens": {
-        "input": 56,
-        "output": 21411,
-        "reasoning": null,
-        "cacheRead": 1174962,
-        "cacheWrite": 56820
+      "firstTry": true,
+      "checklist": {
+        "loads": true,
+        "startScreen": true,
+        "controls": true,
+        "collision": true,
+        "score": true,
+        "difficulty": true,
+        "restart": true,
+        "sandbox": true,
+        "lean": true,
+        "juice": true,
+        "powerup": true,
+        "honesty": true,
+        "true3d": true
       },
-      "costUsd": 2.9563
-    },
-    "diff": {
-      "filesChanged": 11,
-      "insertions": 632,
-      "deletions": 1147,
-      "newFiles": 2
-    },
-    "smoke": {
-      "loads": null,
-      "consoleErrors": null,
-      "notes": ""
-    },
-    "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
-      "notes": ""
-    },
-    "media": {
-      "gif": null
-    }
-  },
-  {
-    "id": "2026-07-10-t2-claude-fable-5",
-    "date": "2026-07-10",
-    "task": "T2",
-    "taskVersion": 2,
-    "base": "base-v1",
-    "harness": {
-      "name": "opencode",
-      "version": "1.17.10",
-      "provider": "github-copilot",
-      "variant": null,
-      "mcpPlaywright": "0.0.78"
-    },
-    "model": "github-copilot/claude-fable-5",
-    "metrics": {
-      "durationSeconds": 435,
-      "turns": 26,
-      "tokens": {
-        "input": 52,
-        "output": 25580,
-        "reasoning": null,
-        "cacheRead": 1010206,
-        "cacheWrite": 51774
-      },
-      "costUsd": 2.9369
-    },
-    "diff": {
-      "filesChanged": 15,
-      "insertions": 965,
-      "deletions": 1606,
-      "newFiles": 2
-    },
-    "smoke": {
-      "loads": null,
-      "consoleErrors": null,
-      "notes": ""
-    },
-    "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
-      "notes": "published by hand: run aborted by a tripwire false positive (concurrent T1 run publishing mid-flight); output + metrics salvaged from workdir/transcript, unmodified"
-    },
-    "media": {
-      "gif": null
-    }
-  },
-  {
-    "id": "2026-07-10-t2-gemini-3.1-pro-preview",
-    "date": "2026-07-10",
-    "task": "T2",
-    "taskVersion": 2,
-    "base": "base-v1",
-    "harness": {
-      "name": "opencode",
-      "version": "1.17.15",
-      "provider": "github-copilot",
-      "variant": null,
-      "mcpPlaywright": "0.0.78"
-    },
-    "model": "github-copilot/gemini-3.1-pro-preview",
-    "metrics": {
-      "durationSeconds": 98,
-      "turns": 12,
-      "tokens": {
-        "input": 47885,
-        "output": 6043,
-        "reasoning": null,
-        "cacheRead": 178609,
-        "cacheWrite": null
-      },
-      "costUsd": 0.204
-    },
-    "diff": {
-      "filesChanged": 15,
-      "insertions": 454,
-      "deletions": 1634,
-      "newFiles": 2
-    },
-    "smoke": {
-      "loads": null,
-      "consoleErrors": null,
-      "notes": ""
-    },
-    "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
-      "notes": ""
-    },
-    "media": {
-      "gif": null
-    }
-  },
-  {
-    "id": "2026-07-10-t1-gemini-3.1-pro-preview",
-    "date": "2026-07-10",
-    "task": "T1",
-    "taskVersion": 1,
-    "base": "base-v1",
-    "harness": {
-      "name": "opencode",
-      "version": "1.17.15",
-      "provider": "github-copilot",
-      "variant": null,
-      "mcpPlaywright": "0.0.78"
-    },
-    "model": "github-copilot/gemini-3.1-pro-preview",
-    "metrics": {
-      "durationSeconds": 664,
-      "turns": 11,
-      "tokens": {
-        "input": 42117,
-        "output": 3454,
-        "reasoning": null,
-        "cacheRead": 176955,
-        "cacheWrite": null
-      },
-      "costUsd": 0.1611
-    },
-    "diff": {
-      "filesChanged": 9,
-      "insertions": 141,
-      "deletions": 1102,
-      "newFiles": 0
-    },
-    "smoke": {
-      "loads": null,
-      "consoleErrors": null,
-      "notes": ""
-    },
-    "review": {
-      "firstTry": null,
-      "playability": null,
-      "creativity": null,
-      "visual": null,
-      "taskFit": null,
-      "notes": ""
+      "notes": "Hrozne pomale ale ako jediny vyuzil preskakovanie medzi lajnami ako subway rush"
     },
     "media": {
       "gif": null

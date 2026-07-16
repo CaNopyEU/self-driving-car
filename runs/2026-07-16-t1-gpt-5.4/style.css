@@ -1,0 +1,78 @@
+html,
+body {
+    margin: 0;
+    min-height: 100%;
+    background: #07111f;
+    color: #eaf3ff;
+    font-family: Arial, sans-serif;
+}
+
+body {
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+}
+
+#gameShell {
+    position: relative;
+    width: min(100vw, 420px);
+    height: min(100vh, 720px);
+    box-shadow: 0 0 32px rgba(0, 0, 0, 0.35);
+    background: #0c1628;
+}
+
+#gameCanvas {
+    width: 100%;
+    height: 100%;
+    display: block;
+}
+
+#hud {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    display: flex;
+    justify-content: space-between;
+    gap: 12px;
+    padding: 12px;
+    font-weight: 700;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+    font-size: 13px;
+    pointer-events: none;
+    text-shadow: 0 2px 6px rgba(0, 0, 0, 0.7);
+}
+
+#overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+    background: rgba(3, 8, 16, 0.6);
+}
+
+#overlay.visible {
+    display: flex;
+}
+
+#overlayCard {
+    max-width: 320px;
+    padding: 24px;
+    border: 2px solid rgba(255, 255, 255, 0.12);
+    border-radius: 18px;
+    background: rgba(10, 18, 32, 0.92);
+    text-align: center;
+}
+
+#overlayCard h1 {
+    margin: 0 0 12px;
+    font-size: 34px;
+}
+
+#overlayCard p {
+    margin: 10px 0;
+    line-height: 1.4;
+}

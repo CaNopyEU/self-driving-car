@@ -1,0 +1,715 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Neon Highway 3D</title>
+    <link rel="icon" href="data:,">
+    <style>
+        :root {
+            color-scheme: dark;
+            font-family: Arial, Helvetica, sans-serif;
+        }
+
+        html, body {
+            margin: 0;
+            overflow: hidden;
+            background: #050816;
+        }
+
+        body {
+            color: #eef4ff;
+        }
+
+        canvas {
+            display: block;
+            width: 100vw;
+            height: 100vh;
+        }
+
+        #hud, #overlay {
+            position: fixed;
+            inset: 0;
+            pointer-events: none;
+        }
+
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-start;
+            padding: 18px;
+            box-sizing: border-box;
+            font-weight: 700;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.7);
+        }
+
+        .panel {
+            background: rgba(5, 10, 24, 0.44);
+            border: 1px solid rgba(170, 200, 255, 0.28);
+            border-radius: 14px;
+            padding: 12px 14px;
+            backdrop-filter: blur(8px);
+        }
+
+        #score {
+            font-size: 28px;
+            min-width: 148px;
+        }
+
+        #status {
+            text-align: right;
+            font-size: 14px;
+            line-height: 1.45;
+            min-width: 180px;
+        }
+
+        #overlay {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 24px;
+            box-sizing: border-box;
+            background: rgba(3, 5, 14, 0.24);
+            pointer-events: auto;
+        }
+
+        #card {
+            max-width: 520px;
+            width: min(520px, calc(100vw - 48px));
+            background: linear-gradient(180deg, rgba(14, 20, 42, 0.92), rgba(6, 10, 24, 0.9));
+            border: 1px solid rgba(120, 194, 255, 0.4);
+            border-radius: 24px;
+            padding: 26px 28px;
+            box-shadow: 0 18px 80px rgba(0, 0, 0, 0.45);
+        }
+
+        h1, h2, p {
+            margin: 0;
+        }
+
+        h1 {
+            font-size: clamp(34px, 7vw, 56px);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            color: #8fd7ff;
+        }
+
+        h2 {
+            margin-top: 10px;
+            font-size: 22px;
+        }
+
+        p {
+            margin-top: 12px;
+            line-height: 1.5;
+            color: #dfe8ff;
+        }
+
+        .accent {
+            color: #7ef6d5;
+            font-weight: 700;
+        }
+    </style>
+</head>
+<body>
+    <canvas id="game" aria-label="3D endless driving game"></canvas>
+    <div id="hud">
+        <div id="score" class="panel">Score 0</div>
+        <div id="status" class="panel">Steer: Arrow keys or WASD<br>Power-up: none</div>
+    </div>
+    <div id="overlay">
+        <div id="card"></div>
+    </div>
+    <script>
+        const canvas = document.getElementById("game");
+        const ctx = canvas.getContext("2d");
+        const scoreEl = document.getElementById("score");
+        const statusEl = document.getElementById("status");
+        const overlay = document.getElementById("overlay");
+        const card = document.getElementById("card");
+
+        const ROAD_WIDTH = 12;
+        const LANE_COUNT = 4;
+        const PLAYER_Z_OFFSET = 10;
+        const VIEW_DISTANCE = 180;
+        const SKY_TOP = "#081123";
+        const SKY_BOTTOM = "#1d2f56";
+        const ROAD_COLORS = ["#1d2435", "#161d2c"];
+        const CAR_PALETTES = [
+            { rear: "#ff6e7a", side: "#be4251", top: "#ff9faa" },
+            { rear: "#ffd166", side: "#be9030", top: "#ffe09b" },
+            { rear: "#55e6a5", side: "#24956c", top: "#89ffd0" },
+            { rear: "#7d9bff", side: "#4661bf", top: "#afbeff" }
+        ];
+
+        const game = {
+            mode: "title",
+            width: 1,
+            height: 1,
+            horizonY: 1,
+            focal: 1,
+            score: 0,
+            elapsed: 0,
+            distance: 0,
+            speed: 24,
+            shake: 0,
+            flash: 0,
+            crashTimer: 0,
+            spawnTimer: 0,
+            powerupTimer: 0,
+            shieldTimer: 0,
+            camera: { x: 0, y: 5.4, z: -6 },
+            player: { x: 0, y: 0.55, z: 0, vx: 0 },
+            obstacles: [],
+            powerups: [],
+            particles: [],
+            input: { left: false, right: false },
+            audio: null,
+            lastTime: 0
+        };
+        window.__game = game;
+
+        function resize() {
+            const dpr = Math.min(window.devicePixelRatio || 1, 2);
+            game.width = window.innerWidth;
+            game.height = window.innerHeight;
+            canvas.width = Math.floor(game.width * dpr);
+            canvas.height = Math.floor(game.height * dpr);
+            ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+            game.horizonY = game.height * 0.34;
+            game.focal = Math.min(game.width, game.height) * 0.9;
+        }
+
+        function laneCenter(index) {
+            const laneWidth = ROAD_WIDTH / LANE_COUNT;
+            return -ROAD_WIDTH / 2 + laneWidth * (index + 0.5);
+        }
+
+        function rand(min, max) {
+            return min + Math.random() * (max - min);
+        }
+
+        function clamp(value, min, max) {
+            return Math.max(min, Math.min(max, value));
+        }
+
+        function project(x, y, z) {
+            const dz = z - game.camera.z;
+            if (dz <= 0.1) {
+                return null;
+            }
+            const scale = game.focal / dz;
+            return {
+                x: game.width * 0.5 + (x - game.camera.x) * scale,
+                y: game.horizonY - (y - game.camera.y) * scale,
+                scale,
+                dz
+            };
+        }
+
+        function drawPolygon(points, fill) {
+            if (points.some((point) => !point)) {
+                return;
+            }
+            ctx.fillStyle = fill;
+            ctx.beginPath();
+            ctx.moveTo(points[0].x, points[0].y);
+            for (let i = 1; i < points.length; i += 1) {
+                ctx.lineTo(points[i].x, points[i].y);
+            }
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function drawRoad() {
+            const sky = ctx.createLinearGradient(0, 0, 0, game.height);
+            sky.addColorStop(0, SKY_TOP);
+            sky.addColorStop(0.55, SKY_BOTTOM);
+            sky.addColorStop(1, "#090b12");
+            ctx.fillStyle = sky;
+            ctx.fillRect(0, 0, game.width, game.height);
+
+            const start = Math.floor(game.camera.z / 6) * 6;
+            for (let z = start + VIEW_DISTANCE; z >= start + 6; z -= 6) {
+                const leftNear = project(-ROAD_WIDTH / 2, 0, z);
+                const rightNear = project(ROAD_WIDTH / 2, 0, z);
+                const leftFar = project(-ROAD_WIDTH / 2, 0, z + 6);
+                const rightFar = project(ROAD_WIDTH / 2, 0, z + 6);
+                drawPolygon([leftFar, rightFar, rightNear, leftNear], ROAD_COLORS[(Math.floor(z / 6) % 2 + 2) % 2]);
+
+                for (let lane = 1; lane < LANE_COUNT; lane += 1) {
+                    if (Math.floor(z / 12) % 2 !== 0) {
+                        continue;
+                    }
+                    const x = -ROAD_WIDTH / 2 + lane * (ROAD_WIDTH / LANE_COUNT);
+                    const markerNearL = project(x - 0.08, 0.02, z + 1);
+                    const markerNearR = project(x + 0.08, 0.02, z + 1);
+                    const markerFarL = project(x - 0.05, 0.02, z + 4.6);
+                    const markerFarR = project(x + 0.05, 0.02, z + 4.6);
+                    drawPolygon([markerFarL, markerFarR, markerNearR, markerNearL], "#e6f5ff");
+                }
+
+                const shoulderColor = "#3ce4ff";
+                const edgeLeftNear = project(-ROAD_WIDTH / 2 - 0.12, 0.03, z);
+                const edgeLeftFar = project(-ROAD_WIDTH / 2 - 0.12, 0.03, z + 6);
+                const edgeRightNear = project(ROAD_WIDTH / 2 + 0.12, 0.03, z);
+                const edgeRightFar = project(ROAD_WIDTH / 2 + 0.12, 0.03, z + 6);
+                drawPolygon([project(-ROAD_WIDTH / 2 - 0.02, 0.03, z + 6), edgeLeftFar, edgeLeftNear, project(-ROAD_WIDTH / 2 - 0.02, 0.03, z)], shoulderColor);
+                drawPolygon([project(ROAD_WIDTH / 2 + 0.02, 0.03, z + 6), edgeRightFar, edgeRightNear, project(ROAD_WIDTH / 2 + 0.02, 0.03, z)], shoulderColor);
+            }
+        }
+
+        function drawPrism(x, y, z, width, height, length, palette) {
+            const nearZ = z - length / 2;
+            const farZ = z + length / 2;
+            const bottom = y - height / 2;
+            const top = y + height / 2;
+
+            const nlb = project(x - width / 2, bottom, nearZ);
+            const nrb = project(x + width / 2, bottom, nearZ);
+            const nlt = project(x - width / 2, top, nearZ);
+            const nrt = project(x + width / 2, top, nearZ);
+            const flb = project(x - width / 2, bottom, farZ);
+            const frb = project(x + width / 2, bottom, farZ);
+            const flt = project(x - width / 2, top, farZ);
+            const frt = project(x + width / 2, top, farZ);
+
+            drawPolygon([flt, frt, nrt, nlt], palette.top);
+            drawPolygon([nlb, nrb, nrt, nlt], palette.rear);
+            if (x >= game.camera.x) {
+                drawPolygon([nrb, frb, frt, nrt], palette.side);
+            } else {
+                drawPolygon([nlb, flb, flt, nlt], palette.side);
+            }
+        }
+
+        function drawCar(car, isPlayer) {
+            drawPrism(car.x, car.y + 0.42, car.z, 1.45, 0.9, 2.7, car.palette);
+            drawPrism(car.x, car.y + 0.95, car.z + 0.1, 1.05, 0.45, 1.45, {
+                rear: "#d8f3ff",
+                side: "#83a9bd",
+                top: "#ffffff"
+            });
+
+            const center = project(car.x, car.y + 0.72, car.z);
+            if (center) {
+                if (isPlayer && game.shieldTimer > 0) {
+                    ctx.strokeStyle = "rgba(100, 255, 235, 0.9)";
+                    ctx.lineWidth = Math.max(2, center.scale * 0.08);
+                    ctx.beginPath();
+                    ctx.ellipse(center.x, center.y, center.scale * 1.1, center.scale * 1.55, 0, 0, Math.PI * 2);
+                    ctx.stroke();
+                }
+                ctx.fillStyle = isPlayer ? "#b7fbff" : "#fff0f2";
+                ctx.fillRect(center.x - center.scale * 0.2, center.y - center.scale * 0.08, center.scale * 0.4, center.scale * 0.08);
+            }
+        }
+
+        function drawPowerup(powerup) {
+            const center = project(powerup.x, 0.95 + Math.sin(powerup.spin) * 0.2, powerup.z);
+            if (!center) {
+                return;
+            }
+            const size = center.scale * 0.6;
+            ctx.strokeStyle = "rgba(108,255,222,0.95)";
+            ctx.lineWidth = Math.max(2, center.scale * 0.06);
+            ctx.beginPath();
+            ctx.arc(center.x, center.y, size * 0.9, 0, Math.PI * 2);
+            ctx.stroke();
+            ctx.fillStyle = "rgba(126, 246, 213, 0.95)";
+            ctx.beginPath();
+            ctx.moveTo(center.x, center.y - size);
+            ctx.lineTo(center.x + size * 0.72, center.y);
+            ctx.lineTo(center.x, center.y + size);
+            ctx.lineTo(center.x - size * 0.72, center.y);
+            ctx.closePath();
+            ctx.fill();
+        }
+
+        function spawnWave() {
+            const lanes = [0, 1, 2, 3].sort(() => Math.random() - 0.5);
+            const count = game.elapsed > 25 ? 3 : 2;
+            for (let i = 0; i < count; i += 1) {
+                const lane = lanes[i];
+                game.obstacles.push({
+                    x: laneCenter(lane) + rand(-0.18, 0.18),
+                    y: 0.55,
+                    z: game.player.z + 90 + i * 12 + rand(0, 24),
+                    speed: rand(7, 12) + game.elapsed * 0.05,
+                    palette: CAR_PALETTES[Math.floor(Math.random() * CAR_PALETTES.length)]
+                });
+            }
+        }
+
+        function spawnPowerup() {
+            game.powerups.push({
+                x: laneCenter(Math.floor(Math.random() * LANE_COUNT)),
+                z: game.player.z + 110 + rand(0, 30),
+                spin: 0
+            });
+        }
+
+        function burst(x, y, z, color, count, speed) {
+            for (let i = 0; i < count; i += 1) {
+                game.particles.push({
+                    x,
+                    y,
+                    z,
+                    vx: rand(-speed, speed),
+                    vy: rand(0.2, speed * 0.6),
+                    vz: rand(-speed, speed),
+                    life: rand(0.45, 1),
+                    maxLife: 1,
+                    color
+                });
+            }
+        }
+
+        function createAudio() {
+            try {
+                const AudioContextRef = window.AudioContext || window.webkitAudioContext;
+                if (!AudioContextRef) {
+                    return null;
+                }
+                const audio = { ctx: new AudioContextRef() };
+                audio.master = audio.ctx.createGain();
+                audio.master.gain.value = 0.16;
+                audio.master.connect(audio.ctx.destination);
+                audio.engine = audio.ctx.createOscillator();
+                audio.engine.type = "sawtooth";
+                audio.engineGain = audio.ctx.createGain();
+                audio.engineGain.gain.value = 0.0001;
+                audio.engine.connect(audio.engineGain);
+                audio.engineGain.connect(audio.master);
+                audio.engine.start();
+                return audio;
+            } catch (_error) {
+                return null;
+            }
+        }
+
+        function ensureAudio() {
+            if (!game.audio) {
+                game.audio = createAudio();
+            }
+            if (game.audio) {
+                game.audio.ctx.resume().catch(() => {});
+            }
+        }
+
+        function playTone(frequency, duration, type, volume, slideTo) {
+            if (!game.audio) {
+                return;
+            }
+            const now = game.audio.ctx.currentTime;
+            const osc = game.audio.ctx.createOscillator();
+            const gain = game.audio.ctx.createGain();
+            osc.type = type;
+            osc.frequency.setValueAtTime(frequency, now);
+            if (slideTo) {
+                osc.frequency.exponentialRampToValueAtTime(slideTo, now + duration);
+            }
+            gain.gain.setValueAtTime(volume, now);
+            gain.gain.exponentialRampToValueAtTime(0.0001, now + duration);
+            osc.connect(gain);
+            gain.connect(game.audio.master);
+            osc.start(now);
+            osc.stop(now + duration);
+        }
+
+        function playCrash() {
+            if (!game.audio) {
+                return;
+            }
+            const length = Math.floor(game.audio.ctx.sampleRate * 0.35);
+            const buffer = game.audio.ctx.createBuffer(1, length, game.audio.ctx.sampleRate);
+            const data = buffer.getChannelData(0);
+            for (let i = 0; i < length; i += 1) {
+                data[i] = (Math.random() * 2 - 1) * (1 - i / length);
+            }
+            const source = game.audio.ctx.createBufferSource();
+            const gain = game.audio.ctx.createGain();
+            source.buffer = buffer;
+            gain.gain.value = 0.35;
+            source.connect(gain);
+            gain.connect(game.audio.master);
+            source.start();
+            playTone(180, 0.4, "square", 0.18, 42);
+        }
+
+        function updateEngine() {
+            if (!game.audio) {
+                return;
+            }
+            const now = game.audio.ctx.currentTime;
+            const targetFreq = game.mode === "playing" ? 62 + game.speed * 2.4 + Math.abs(game.player.vx) * 6 : 50;
+            const targetGain = game.mode === "playing" ? 0.028 : 0.0001;
+            game.audio.engine.frequency.linearRampToValueAtTime(targetFreq, now + 0.08);
+            game.audio.engineGain.gain.linearRampToValueAtTime(targetGain, now + 0.08);
+        }
+
+        function startRun() {
+            ensureAudio();
+            game.mode = "playing";
+            game.score = 0;
+            game.elapsed = 0;
+            game.distance = 0;
+            game.speed = 24;
+            game.shake = 0;
+            game.flash = 0;
+            game.crashTimer = 0;
+            game.spawnTimer = 0.35;
+            game.powerupTimer = 6.5;
+            game.shieldTimer = 0;
+            game.player.x = 0;
+            game.player.z = 0;
+            game.player.vx = 0;
+            game.camera.x = 0;
+            game.camera.z = -6;
+            game.obstacles = [];
+            game.powerups = [];
+            game.particles = [];
+            for (let i = 0; i < 4; i += 1) {
+                spawnWave();
+            }
+            overlay.style.display = "none";
+            updateHud();
+        }
+
+        function showTitle() {
+            game.mode = "title";
+            overlay.style.display = "flex";
+            card.innerHTML = "<h1>Neon Highway 3D</h1><h2>Endless highway dodger</h2><p>Steer with <span class='accent'>Arrow keys</span> or <span class='accent'>WASD</span>. Dodge traffic, collect the <span class='accent'>shield</span>, and survive as the highway speeds up.</p><p>Press any steering key or click to start.</p>";
+            updateHud();
+        }
+
+        function showGameOver() {
+            game.mode = "gameover";
+            overlay.style.display = "flex";
+            card.innerHTML = "<h1>Crash</h1><h2>Final score: " + game.score + "</h2><p>Traffic gets faster and denser the longer you last. Press any steering key or click to restart.</p>";
+            updateHud();
+        }
+
+        function hitObstacle(obstacleIndex) {
+            const obstacle = game.obstacles[obstacleIndex];
+            burst(obstacle.x, 0.7, obstacle.z, "#ffb2b8", 22, 2.8);
+            game.flash = 1;
+            game.shake = 16;
+            if (game.shieldTimer > 0) {
+                game.shieldTimer = 0;
+                game.obstacles.splice(obstacleIndex, 1);
+                playTone(240, 0.16, "square", 0.1, 120);
+                return;
+            }
+            playCrash();
+            burst(game.player.x, 0.7, game.player.z + 1.6, "#fff0a0", 42, 4.2);
+            game.mode = "crashed";
+            game.crashTimer = 1.15;
+        }
+
+        function updateHud() {
+            scoreEl.textContent = "Score " + game.score;
+            let powerText = "none";
+            if (game.shieldTimer > 0) {
+                powerText = "shield " + game.shieldTimer.toFixed(1) + "s";
+            }
+            statusEl.innerHTML = "Steer: Arrow keys or WASD<br>Power-up: " + powerText;
+        }
+
+        function update(dt) {
+            game.flash = Math.max(0, game.flash - dt * 1.8);
+            game.shake = Math.max(0, game.shake - dt * 18);
+            updateEngine();
+
+            if (game.mode === "title" || game.mode === "gameover") {
+                game.camera.x += (game.player.x - game.camera.x) * Math.min(1, dt * 2.5);
+                game.camera.z += (game.player.z - 6 - game.camera.z) * Math.min(1, dt * 2.5);
+                return;
+            }
+
+            if (game.mode === "playing") {
+                game.elapsed += dt;
+                game.speed = 24 + Math.min(26, game.elapsed * 0.5);
+                game.distance += game.speed * dt;
+                game.score = Math.floor(game.distance * 9);
+                game.shieldTimer = Math.max(0, game.shieldTimer - dt);
+
+                const steer = (game.input.left ? -1 : 0) + (game.input.right ? 1 : 0);
+                game.player.vx += steer * dt * 34;
+                game.player.vx *= Math.pow(0.0005, dt);
+                game.player.x = clamp(game.player.x + game.player.vx * dt, -ROAD_WIDTH / 2 + 0.95, ROAD_WIDTH / 2 - 0.95);
+                game.player.z += game.speed * dt;
+
+                game.spawnTimer -= dt;
+                if (game.spawnTimer <= 0) {
+                    spawnWave();
+                    game.spawnTimer = Math.max(0.38, 1.05 - game.elapsed * 0.01);
+                }
+
+                game.powerupTimer -= dt;
+                if (game.powerupTimer <= 0) {
+                    spawnPowerup();
+                    game.powerupTimer = rand(9.5, 12.5);
+                }
+            }
+
+            for (let i = game.obstacles.length - 1; i >= 0; i -= 1) {
+                const obstacle = game.obstacles[i];
+                obstacle.z += obstacle.speed * dt;
+                const dz = obstacle.z - game.player.z;
+                if (dz < -18) {
+                    game.obstacles.splice(i, 1);
+                    continue;
+                }
+                if ((game.mode === "playing" || game.mode === "crashed") && Math.abs(obstacle.x - game.player.x) < 1.18 && Math.abs(dz) < 2.2) {
+                    if (game.mode === "playing") {
+                        hitObstacle(i);
+                    }
+                }
+            }
+
+            for (let i = game.powerups.length - 1; i >= 0; i -= 1) {
+                const powerup = game.powerups[i];
+                powerup.spin += dt * 4;
+                const dz = powerup.z - game.player.z;
+                if (dz < -15) {
+                    game.powerups.splice(i, 1);
+                    continue;
+                }
+                if (game.mode === "playing" && Math.abs(powerup.x - game.player.x) < 1.15 && Math.abs(dz) < 2.4) {
+                    game.shieldTimer = 7;
+                    game.flash = 0.45;
+                    game.powerups.splice(i, 1);
+                    burst(powerup.x, 1, powerup.z, "#7ef6d5", 20, 2.5);
+                    playTone(520, 0.22, "triangle", 0.09, 820);
+                }
+            }
+
+            for (let i = game.particles.length - 1; i >= 0; i -= 1) {
+                const particle = game.particles[i];
+                particle.life -= dt;
+                particle.x += particle.vx * dt;
+                particle.y += particle.vy * dt;
+                particle.z += (particle.vz + 8) * dt;
+                particle.vy -= dt * 5.8;
+                if (particle.life <= 0) {
+                    game.particles.splice(i, 1);
+                }
+            }
+
+            game.camera.x += (game.player.x * 0.42 - game.camera.x) * Math.min(1, dt * 5);
+            game.camera.z += (game.player.z - PLAYER_Z_OFFSET - game.camera.z) * Math.min(1, dt * 6);
+
+            if (game.mode === "crashed") {
+                game.crashTimer -= dt;
+                if (game.crashTimer <= 0) {
+                    showGameOver();
+                }
+            }
+
+            updateHud();
+        }
+
+        function render() {
+            ctx.save();
+            if (game.shake > 0) {
+                ctx.translate(rand(-game.shake, game.shake), rand(-game.shake, game.shake));
+            }
+
+            drawRoad();
+
+            const objects = [];
+            for (const obstacle of game.obstacles) {
+                objects.push({ kind: "car", z: obstacle.z, object: obstacle, player: false });
+            }
+            for (const powerup of game.powerups) {
+                objects.push({ kind: "powerup", z: powerup.z, object: powerup });
+            }
+            objects.push({ kind: "car", z: game.player.z, object: { ...game.player, palette: { rear: "#57f1ff", side: "#248ba5", top: "#c2fcff" } }, player: true });
+            objects.sort((a, b) => b.z - a.z);
+
+            for (const item of objects) {
+                if (item.kind === "car") {
+                    drawCar(item.object, item.player);
+                } else {
+                    drawPowerup(item.object);
+                }
+            }
+
+            for (const particle of game.particles) {
+                const point = project(particle.x, particle.y, particle.z);
+                if (!point) {
+                    continue;
+                }
+                ctx.fillStyle = particle.color;
+                ctx.globalAlpha = clamp(particle.life / particle.maxLife, 0, 1);
+                ctx.beginPath();
+                ctx.arc(point.x, point.y, Math.max(1.5, point.scale * 0.14), 0, Math.PI * 2);
+                ctx.fill();
+                ctx.globalAlpha = 1;
+            }
+
+            if (game.flash > 0) {
+                ctx.fillStyle = "rgba(255, 120, 120, " + (game.flash * 0.45) + ")";
+                ctx.fillRect(0, 0, game.width, game.height);
+            }
+            ctx.restore();
+        }
+
+        function frame(timestamp) {
+            if (!game.lastTime) {
+                game.lastTime = timestamp;
+            }
+            const dt = Math.min(0.033, (timestamp - game.lastTime) / 1000);
+            game.lastTime = timestamp;
+            update(dt);
+            render();
+            requestAnimationFrame(frame);
+        }
+
+        function beginFromInput() {
+            if (game.mode === "title" || game.mode === "gameover") {
+                startRun();
+            }
+        }
+
+        function setControl(key, value) {
+            if (key === "ArrowLeft" || key === "a" || key === "A") {
+                game.input.left = value;
+                return true;
+            }
+            if (key === "ArrowRight" || key === "d" || key === "D") {
+                game.input.right = value;
+                return true;
+            }
+            return false;
+        }
+
+        window.addEventListener("keydown", (event) => {
+            if (setControl(event.key, true)) {
+                event.preventDefault();
+                beginFromInput();
+            }
+            if ((event.key === "w" || event.key === "W") && game.mode !== "playing") {
+                beginFromInput();
+            }
+        }, { passive: false });
+
+        window.addEventListener("keyup", (event) => {
+            if (setControl(event.key, false)) {
+                event.preventDefault();
+            }
+        }, { passive: false });
+
+        overlay.addEventListener("click", () => {
+            beginFromInput();
+        });
+
+        window.addEventListener("resize", resize);
+
+        resize();
+        showTitle();
+        requestAnimationFrame(frame);
+    </script>
+</body>
+</html>
